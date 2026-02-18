@@ -3,4 +3,10 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="theme_background">#0A0A0A</color>
+    <color name="g_gray700">#666666</color>
+    <color name="text_background">#414243</color>
+    <color name="search_bar_background">#F0F0F0</color>
+    <color name="progressbar_background">#FAFBFC</color>
+    <color name="g_blue_gray200">#97AABD</color>
+    <color name="red">#FF0000</color>
 </resources>

@@ -12,7 +12,16 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Logix">
         <activity
+            android:name=".UserActivity"
+            android:exported="false" />
+        <activity
+            android:name=".EditLogoActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashScreenActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

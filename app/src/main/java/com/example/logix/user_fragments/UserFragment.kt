@@ -1,21 +1,18 @@
-package com.example.logix.fragments
+package com.example.logix.user_fragments
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.logix.databinding.FragmentSignUpBinding
-
-class SignUpFragment : Fragment() {
-
-    private lateinit var binding: FragmentSignUpBinding
+import com.example.logix.R
+class UserFragment : Fragment() {
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        binding = FragmentSignUpBinding.inflate(inflater, container, false)
-        return binding.root
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_user, container, false)
     }
 }
