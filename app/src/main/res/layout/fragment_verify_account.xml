@@ -7,28 +7,6 @@
     tools:context=".login_fragments.VerifyAccountFragment">
 
     <ImageView
-        android:id="@+id/shadow1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/shadow1"
-        android:scaleType="centerCrop"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:translationX="-50dp"
-        android:translationY="-250dp" />
-
-    <ImageView
-        android:id="@+id/shadow2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        android:src="@drawable/shadow2"
-        android:translationX="50dp"
-        android:translationY="350dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
-
-    <ImageView
         android:id="@+id/imageView"
         android:layout_width="250dp"
         android:layout_height="150dp"
@@ -44,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="8dp"
         android:text="Please Verify Account"
-        android:textColor="#FFFFFF"
+        android:textColor="#394999"
         android:textSize="20sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toTopOf="@+id/sendToEmailText"
@@ -66,27 +44,33 @@
         <!-- 6 EditTexts for code -->
         <EditText
             android:id="@+id/etCode1"
-            style="@style/CodeEditText" />
+            style="@style/CodeEditText"
+            android:text="4"/>
 
         <EditText
             android:id="@+id/etCode2"
-            style="@style/CodeEditText" />
+            style="@style/CodeEditText"
+            android:text="8"/>
 
         <EditText
             android:id="@+id/etCode3"
-            style="@style/CodeEditText" />
+            style="@style/CodeEditText"
+            android:text="7"/>
 
         <EditText
             android:id="@+id/etCode4"
-            style="@style/CodeEditText" />
+            style="@style/CodeEditText"
+            android:text="3"/>
 
         <EditText
             android:id="@+id/etCode5"
-            style="@style/CodeEditText" />
+            style="@style/CodeEditText"
+            android:text="1"/>
 
         <EditText
             android:id="@+id/etCode6"
-            style="@style/CodeEditText" />
+            style="@style/CodeEditText"
+            android:text="2"/>
     </LinearLayout>
 
     <TextView
@@ -106,7 +90,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="4dp"
-        android:text="02:00"
+        android:text="01:32"
         android:textColor="#9CA3AF"
         android:textSize="15sp"
         app:layout_constraintEnd_toStartOf="@+id/timeImage"
@@ -142,7 +126,7 @@
         android:layout_marginBottom="8dp"
         android:textSize="14dp"
         android:textColor="#9CA3AF"
-        android:text="Code sent to harutyunyanlevon99@gmail.com"
+        android:text="Code sent to nushik.karapetyan@gmail.com"
         app:layout_constraintBottom_toTopOf="@+id/llCode"
         app:layout_constraintEnd_toEndOf="@+id/llCode"
         app:layout_constraintStart_toStartOf="@+id/llCode" />
