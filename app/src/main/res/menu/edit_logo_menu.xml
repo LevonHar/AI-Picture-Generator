@@ -14,4 +14,20 @@
         android:title="Redo"
         app:showAsAction="always" />
 
+    <item
+        android:id="@+id/action_download"
+        android:title="Download"
+        android:icon="@drawable/ic_download"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/eye_open"
+        android:icon="@drawable/ic_eye_open"
+        android:title="eye"
+        app:showAsAction="always" />
+
+    <item
+        android:id="@+id/action_save_edits"
+        android:title="Save Edits"
+        app:showAsAction="ifRoom" />
 </menu>

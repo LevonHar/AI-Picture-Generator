@@ -1,20 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     android:background="@color/white"
     tools:context=".user_fragments.FavoriteFragment">
 
+    <!-- Favorite Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Favorites"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingStart="15dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="5dp"/>
+
+    <!-- Favorite RecyclerView -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/favRecycler"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginStart="15dp"
-        android:layout_marginTop="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="10dp"
+        android:layout_height="0dp"
         android:layout_weight="1"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
         android:background="@drawable/recycler_bg"/>
 
-</FrameLayout>
+    <!-- Edited Logos Title -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Edited Logos"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:paddingStart="15dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="5dp"/>
+
+    <!-- Changed RecyclerView -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/changedRecycler"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginStart="15dp"
+        android:layout_marginEnd="15dp"
+        android:layout_marginBottom="10dp"
+        android:background="@drawable/recycler_bg"/>
+
+</LinearLayout>

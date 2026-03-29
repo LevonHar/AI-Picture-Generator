@@ -44,33 +44,27 @@
         <!-- 6 EditTexts for code -->
         <EditText
             android:id="@+id/etCode1"
-            style="@style/CodeEditText"
-            android:text="4"/>
+            style="@style/CodeEditText" />
 
         <EditText
             android:id="@+id/etCode2"
-            style="@style/CodeEditText"
-            android:text="8"/>
+            style="@style/CodeEditText" />
 
         <EditText
             android:id="@+id/etCode3"
-            style="@style/CodeEditText"
-            android:text="7"/>
+            style="@style/CodeEditText" />
 
         <EditText
             android:id="@+id/etCode4"
-            style="@style/CodeEditText"
-            android:text="3"/>
+            style="@style/CodeEditText" />
 
         <EditText
             android:id="@+id/etCode5"
-            style="@style/CodeEditText"
-            android:text="1"/>
+            style="@style/CodeEditText" />
 
         <EditText
             android:id="@+id/etCode6"
-            style="@style/CodeEditText"
-            android:text="2"/>
+            style="@style/CodeEditText" />
     </LinearLayout>
 
     <TextView

@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -28,6 +30,7 @@ class LogInFragment : Fragment() {
 
     private lateinit var binding: FragmentLogInBinding
     private val TAG = "LogInFragment"
+    private var isPasswordVisible = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -45,6 +48,9 @@ class LogInFragment : Fragment() {
         setupForgotPassword()
         setupSignUp()
         setupTextWatchers()
+        setupPasswordVisibilityToggle()
+        loadSavedCredentials()
+        checkAutoLogin()
     }
 
     private fun setupLogin() {
@@ -55,23 +61,80 @@ class LogInFragment : Fragment() {
         }
     }
 
+    private fun loadSavedCredentials() {
+        val sharedPrefManager = SharedPrefManager.getInstance(requireContext())
+        if (sharedPrefManager.isRememberMeEnabled()) {
+            val savedEmail = sharedPrefManager.getSavedEmail()
+            val savedPassword = sharedPrefManager.getSavedPassword()
+
+            if (!savedEmail.isNullOrEmpty()) {
+                binding.etEmail.setText(savedEmail)
+            }
+            if (!savedPassword.isNullOrEmpty()) {
+                binding.etPassword.setText(savedPassword)
+            }
+
+            // Auto-check the remember me checkbox if credentials were saved
+            binding.cbRememberMe.isChecked = true
+        }
+    }
+
+    private fun checkAutoLogin() {
+        val sharedPrefManager = SharedPrefManager.getInstance(requireContext())
+
+        // Check if user is already logged in and remember me is enabled
+        if (sharedPrefManager.isValidSession() && sharedPrefManager.isRememberMeEnabled()) {
+            // Auto navigate to UserActivity
+            val intent = Intent(requireContext(), UserActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
+            requireActivity().finish()
+        }
+    }
+
+    private fun setupPasswordVisibilityToggle() {
+        binding.ivPasswordVisibility.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+            togglePasswordVisibility(
+                editText = binding.etPassword,
+                imageView = binding.ivPasswordVisibility,
+                isVisible = isPasswordVisible
+            )
+        }
+    }
+
+    private fun togglePasswordVisibility(editText: EditText, imageView: android.widget.ImageView, isVisible: Boolean) {
+        if (isVisible) {
+            editText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+            imageView.setImageResource(R.drawable.ic_eye_open)
+        } else {
+            editText.transformationMethod = PasswordTransformationMethod.getInstance()
+            imageView.setImageResource(R.drawable.ic_eye_closed)
+        }
+        editText.setSelection(editText.text.length)
+    }
+
     private fun setupTextWatchers() {
-        binding.emailText.addTextChangedListener(object : TextWatcher {
+        binding.etEmail.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                if (!s.isNullOrEmpty()) {
+                if (!s.isNullOrEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(s).matches()) {
+                    binding.emailLayout.setBackgroundResource(R.drawable.edit_text_background)
+                    binding.etEmail.error = null
+                } else if (!s.isNullOrEmpty()) {
                     binding.emailLayout.setBackgroundResource(R.drawable.edit_text_background)
                 }
             }
         })
 
-        binding.passwordText.addTextChangedListener(object : TextWatcher {
+        binding.etPassword.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun afterTextChanged(s: Editable?) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!s.isNullOrEmpty()) {
                     binding.passwordLayout.setBackgroundResource(R.drawable.edit_text_background)
+                    binding.etPassword.error = null
                 }
             }
         })
@@ -79,22 +142,22 @@ class LogInFragment : Fragment() {
 
     private fun validateInputs(): Boolean {
         var isValid = true
-        val email = binding.emailText.text.toString().trim()
-        val password = binding.passwordText.text.toString().trim()
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString().trim()
 
         if (email.isEmpty()) {
             binding.emailLayout.setBackgroundResource(R.drawable.edit_text_error_background)
-            binding.emailText.error = "Email is required"
+            binding.etEmail.error = "Email is required"
             isValid = false
         } else if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             binding.emailLayout.setBackgroundResource(R.drawable.edit_text_error_background)
-            binding.emailText.error = "Enter a valid email"
+            binding.etEmail.error = "Enter a valid email"
             isValid = false
         }
 
         if (password.isEmpty()) {
             binding.passwordLayout.setBackgroundResource(R.drawable.edit_text_error_background)
-            binding.passwordText.error = "Password is required"
+            binding.etPassword.error = "Password is required"
             isValid = false
         }
 
@@ -102,9 +165,12 @@ class LogInFragment : Fragment() {
     }
 
     private fun performLogin() {
+        val email = binding.etEmail.text.toString().trim()
+        val password = binding.etPassword.text.toString().trim()
+
         val loginRequest = LoginRequest(
-            email = binding.emailText.text.toString().trim(),
-            password = binding.passwordText.text.toString().trim()
+            email = email,
+            password = password
         )
 
         showLoading(true)
@@ -120,12 +186,27 @@ class LogInFragment : Fragment() {
                             Log.d(TAG, "Login successful: ${loginResponse.userName}")
 
                             // Save token and user info
-                            SharedPrefManager.getInstance(requireContext()).saveToken(loginResponse.token)
-                            SharedPrefManager.getInstance(requireContext()).saveUserInfo(
+                            val sharedPrefManager = SharedPrefManager.getInstance(requireContext())
+                            sharedPrefManager.saveToken(loginResponse.token)
+
+                            val emailToSave = loginResponse.email ?: email
+                            sharedPrefManager.saveUserInfo(
                                 loginResponse.userId.toString(),
                                 loginResponse.userName,
-                                loginResponse.email
+                                emailToSave
                             )
+
+                            // Handle Remember Me
+                            val rememberMe = binding.cbRememberMe.isChecked
+                            if (rememberMe) {
+                                // Save credentials for next login
+                                sharedPrefManager.setRememberMe(true, email, password)
+                            } else {
+                                // Clear saved credentials if they exist
+                                if (sharedPrefManager.isRememberMeEnabled()) {
+                                    sharedPrefManager.setRememberMe(false)
+                                }
+                            }
 
                             Toast.makeText(requireContext(),
                                 "Welcome back, ${loginResponse.userName}!",
@@ -150,9 +231,9 @@ class LogInFragment : Fragment() {
                             "Please verify your email before logging in",
                             Toast.LENGTH_LONG).show()
 
-                        // Navigate to verification fragment
-                        val email = binding.emailText.text.toString().trim()
-                        SharedPrefManager.getInstance(requireContext()).saveEmail(email)
+                        // Save email for verification
+                        val sharedPrefManager = SharedPrefManager.getInstance(requireContext())
+                        sharedPrefManager.saveEmail(email)
 
                         val verifyAccountFragment = VerifyAccountFragment()
                         requireActivity().supportFragmentManager.beginTransaction()
@@ -162,8 +243,9 @@ class LogInFragment : Fragment() {
                     }
                     else -> {
                         Log.e(TAG, "Error response code: ${response.code()}")
+                        val errorBody = response.errorBody()?.string()
                         Toast.makeText(requireContext(),
-                            "Login failed. Please try again.",
+                            errorBody ?: "Login failed. Please try again.",
                             Toast.LENGTH_SHORT).show()
                     }
                 }
@@ -208,7 +290,6 @@ class LogInFragment : Fragment() {
         sendBtn.setOnClickListener {
             val email = emailEd.text.toString()
             if (email.isNotEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                // Call reset password API
                 resetPassword(email)
                 dialog.dismiss()
             } else {
@@ -230,8 +311,9 @@ class LogInFragment : Fragment() {
                         "Password reset link sent to your email",
                         Toast.LENGTH_LONG).show()
                 } else {
+                    val errorBody = response.errorBody()?.string()
                     Toast.makeText(requireContext(),
-                        "Failed to send reset link",
+                        errorBody ?: "Failed to send reset link",
                         Toast.LENGTH_SHORT).show()
                 }
             }
@@ -239,7 +321,7 @@ class LogInFragment : Fragment() {
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 showLoading(false)
                 Toast.makeText(requireContext(),
-                    "Network error",
+                    "Network error. Please check your connection.",
                     Toast.LENGTH_SHORT).show()
             }
         })
@@ -248,5 +330,15 @@ class LogInFragment : Fragment() {
     private fun showLoading(show: Boolean) {
         binding.buttonLogIn.isEnabled = !show
         binding.buttonLogIn.text = if (show) "Please wait..." else "Log In"
+
+        // Disable password visibility toggle during loading
+        binding.ivPasswordVisibility.isEnabled = !show
+
+        // Disable inputs during loading
+        binding.etEmail.isEnabled = !show
+        binding.etPassword.isEnabled = !show
+        binding.forgotPasswordText.isEnabled = !show
+        binding.textSignUp.isEnabled = !show
+        binding.cbRememberMe.isEnabled = !show
     }
 }

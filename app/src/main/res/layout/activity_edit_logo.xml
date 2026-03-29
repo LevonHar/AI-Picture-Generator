@@ -132,6 +132,16 @@
                         android:textColor="@android:color/black"
                         android:layout_marginBottom="20dp" />
 
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/transparentBgButton"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Transparent Background: OFF"
+                        android:textColor="#6200EE"
+                        app:iconGravity="textStart"
+                        android:layout_marginTop="8dp"
+                        style="@style/Widget.Material3.Button.OutlinedButton" />
+
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"

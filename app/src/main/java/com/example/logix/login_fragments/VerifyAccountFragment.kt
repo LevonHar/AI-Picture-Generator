@@ -31,6 +31,9 @@ class VerifyAccountFragment : Fragment() {
     private val totalTime = 2 * 60 * 1000L
     private val TAG = "VerifyAccountFragment"
 
+    // Store email as a class variable to ensure it's available throughout
+    private var userEmail: String? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -43,6 +46,7 @@ class VerifyAccountFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupUI()
+        loadUserEmail() // Load email first
         startTimer()
         setupEditTextNavigation()
         setupClickListeners()
@@ -61,13 +65,55 @@ class VerifyAccountFragment : Fragment() {
         binding.etCode1.requestFocus()
     }
 
+    private fun loadUserEmail() {
+        // Try to get email from SharedPreferences
+        userEmail = SharedPrefManager.getInstance(requireContext()).getEmail()
+
+        // If email is null, try to get it from arguments
+        if (userEmail == null) {
+            arguments?.let {
+                userEmail = it.getString("email")
+                if (userEmail != null) {
+                    // Save it to SharedPreferences for future use
+                    SharedPrefManager.getInstance(requireContext()).saveEmail(userEmail!!)
+                }
+            }
+        }
+
+        // If still null, try to get from saved user email
+        if (userEmail == null) {
+            userEmail = SharedPrefManager.getInstance(requireContext()).getUserEmail()
+        }
+
+        Log.d(TAG, "Loaded email: $userEmail")
+    }
+
     private fun displayUserEmail() {
-        val email = SharedPrefManager.getInstance(requireContext()).getEmail()
-        if (email != null) {
-            binding.sendToEmailText.text = "Code sent to $email"
+        if (userEmail != null) {
+            binding.sendToEmailText.text = "Code sent to ${maskEmail(userEmail!!)}"
         } else {
             binding.sendToEmailText.text = "Code sent to your email"
+            // Show a warning that email is missing
+            Toast.makeText(requireContext(),
+                "Email information missing. Please sign up again.",
+                Toast.LENGTH_LONG).show()
         }
+    }
+
+    private fun maskEmail(email: String): String {
+        // Optional: Mask email for privacy (e.g., u***r@example.com)
+        val parts = email.split("@")
+        if (parts.size == 2) {
+            val username = parts[0]
+            val domain = parts[1]
+            val maskedUsername = if (username.length > 2) {
+                username[0] + "***" + username[username.length - 1]
+            } else {
+                "***"
+            }
+            return "$maskedUsername@$domain"
+        }
+        return email
     }
 
     private fun startTimer() {
@@ -150,105 +196,55 @@ class VerifyAccountFragment : Fragment() {
             return
         }
 
-        val email = SharedPrefManager.getInstance(requireContext()).getEmail()
+        // Use the stored email from class variable
+        val email = userEmail ?: SharedPrefManager.getInstance(requireContext()).getEmail()
+
         if (email == null) {
-            Toast.makeText(requireContext(), "Session expired. Please sign up again.", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Email is null in verifyCode")
+            Toast.makeText(requireContext(),
+                "Session expired. Please sign up again.",
+                Toast.LENGTH_LONG).show()
 
             // Navigate back to signup
-            requireActivity().supportFragmentManager.popBackStack(
-                "SignUpFragment",
-                androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
-            )
+            navigateToSignUp()
             return
         }
 
-        showLoading(true)
         Log.d(TAG, "Verifying code for email: $email")
+        showLoading(true)
 
         val verifyRequest = VerifyRequest(email, code)
-        RetrofitClient.instance.verify(verifyRequest).enqueue(object : Callback<VerifyResponse> {
-            override fun onResponse(call: Call<VerifyResponse>, response: Response<VerifyResponse>) {
+        // In your fragment
+        RetrofitClient.instance.verify(verifyRequest).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
                 showLoading(false)
 
                 when (response.code()) {
                     200 -> {
-                        Log.d(TAG, "Verification successful")
-
-                        // Get temp user info
-                        val tempUserId = SharedPrefManager.getInstance(requireContext()).getTempUserId()
-                        val tempUserName = SharedPrefManager.getInstance(requireContext()).getTempUserName()
-                        val tempPassword = SharedPrefManager.getInstance(requireContext()).getTempPassword()
-
-                        // Save permanent user info (now user is fully registered)
-                        if (tempUserId != null && tempUserName != null) {
-                            SharedPrefManager.getInstance(requireContext()).saveUserInfo(
-                                tempUserId,
-                                tempUserName,
-                                email
-                            )
-
-                            // If your API returns a token after verification, save it
-                            response.body()?.message?.let { token ->
-                                SharedPrefManager.getInstance(requireContext()).saveToken(token)
-                            }
-                        }
-
-                        Toast.makeText(requireContext(),
-                            "Email verified successfully! Welcome to Logix.",
-                            Toast.LENGTH_LONG).show()
-
-                        // Clear temp data
-                        SharedPrefManager.getInstance(requireContext()).clearTempUserInfo()
-                        SharedPrefManager.getInstance(requireContext()).clearEmail()
-
-                        // Navigate directly to UserActivity
-                        val intent = Intent(requireContext(), UserActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                        requireActivity().finish()
+                        Log.d(TAG, "Verification successful for email: $email")
+                        handleSuccessfulVerification(email)
                     }
                     207 -> {
-                        Log.d(TAG, "Email already verified")
-
-                        // Get temp user info
-                        val tempUserId = SharedPrefManager.getInstance(requireContext()).getTempUserId()
-                        val tempUserName = SharedPrefManager.getInstance(requireContext()).getTempUserName()
-
-                        // Save user info
-                        if (tempUserId != null && tempUserName != null) {
-                            SharedPrefManager.getInstance(requireContext()).saveUserInfo(
-                                tempUserId,
-                                tempUserName,
-                                email
-                            )
-                        }
-
-                        Toast.makeText(requireContext(),
-                            "Email already verified. Welcome back!",
-                            Toast.LENGTH_LONG).show()
-
-                        // Clear temp data
-                        SharedPrefManager.getInstance(requireContext()).clearTempUserInfo()
-                        SharedPrefManager.getInstance(requireContext()).clearEmail()
-
-                        // Navigate directly to UserActivity
-                        val intent = Intent(requireContext(), UserActivity::class.java)
-                        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                        startActivity(intent)
-                        requireActivity().finish()
+                        Log.d(TAG, "Email already verified: $email")
+                        handleEmailAlreadyVerified(email)
                     }
                     400 -> {
-                        // Invalid code
                         Toast.makeText(requireContext(),
                             "Invalid verification code. Please try again.",
                             Toast.LENGTH_SHORT).show()
                         clearInputFields()
                     }
+                    404 -> {
+                        Toast.makeText(requireContext(),
+                            "User not found. Please sign up again.",
+                            Toast.LENGTH_LONG).show()
+                        navigateToSignUp()
+                    }
                     else -> handleErrorResponse(response, "Verification failed")
                 }
             }
 
-            override fun onFailure(call: Call<VerifyResponse>, t: Throwable) {
+            override fun onFailure(call: Call<Void>, t: Throwable) {
                 showLoading(false)
                 Log.e(TAG, "Network error: ${t.message}")
                 Toast.makeText(requireContext(),
@@ -258,15 +254,117 @@ class VerifyAccountFragment : Fragment() {
         })
     }
 
+    private fun handleSuccessfulVerification(email: String) {
+        val tempUserId = SharedPrefManager.getInstance(requireContext()).getTempUserId()
+        val tempUserName = SharedPrefManager.getInstance(requireContext()).getTempUserName()
+
+        if (tempUserId != null && tempUserName != null) {
+            SharedPrefManager.getInstance(requireContext()).saveUserInfo(
+                tempUserId,
+                tempUserName,
+                email
+            )
+            Log.d(TAG, "User info saved - ID: $tempUserId, Name: $tempUserName, Email: $email")
+        } else {
+            Log.w(TAG, "Temp user info is missing - UserId: $tempUserId, UserName: $tempUserName")
+        }
+
+        Toast.makeText(requireContext(),
+            "Email verified successfully! Please login to continue.",
+            Toast.LENGTH_LONG).show()
+
+        SharedPrefManager.getInstance(requireContext()).clearTempUserInfo()
+
+        // ✅ Navigate to LoginFragment on success
+        navigateToLoginFragment()
+    }
+
+    private fun navigateToLoginFragment() {
+        try {
+            Log.d(TAG, "Navigating to LoginFragment")
+
+            val loginFragment = LogInFragment().apply {
+                arguments = Bundle().also { bundle ->
+                    userEmail?.let { bundle.putString("email", it) }
+                }
+            }
+
+            // ✅ Use your actual fragment container ID (R.id.fragment_container or similar)
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(R.id.fragmentContainer, loginFragment) // 🔁 Replace with your actual container ID
+                .addToBackStack(null)
+                .commitAllowingStateLoss()
+
+        } catch (e: Exception) {
+            Log.e(TAG, "Error navigating to LoginFragment: ${e.message}")
+            try {
+                val intent = Intent(requireContext(), UserActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                startActivity(intent)
+                requireActivity().finish()
+            } catch (ex: Exception) {
+                Log.e(TAG, "Fallback navigation failed: ${ex.message}")
+            }
+        }
+    }
+
+    private fun handleEmailAlreadyVerified(email: String) {
+        // Get temp user info
+        val tempUserId = SharedPrefManager.getInstance(requireContext()).getTempUserId()
+        val tempUserName = SharedPrefManager.getInstance(requireContext()).getTempUserName()
+
+        // Save user info if available
+        if (tempUserId != null && tempUserName != null) {
+            SharedPrefManager.getInstance(requireContext()).saveUserInfo(
+                tempUserId,
+                tempUserName,
+                email
+            )
+        }
+
+        Toast.makeText(requireContext(),
+            "Email already verified. Please login to continue.",
+            Toast.LENGTH_LONG).show()
+
+        // Clear temp data
+        SharedPrefManager.getInstance(requireContext()).clearTempUserInfo()
+
+        // Navigate to LoginFragment
+        navigateToLoginFragment()
+    }
+
+    private fun navigateToSignUp() {
+        try {
+            requireActivity().supportFragmentManager.popBackStack(
+                "SignUpFragment",
+                androidx.fragment.app.FragmentManager.POP_BACK_STACK_INCLUSIVE
+            )
+
+            // If popBackStack doesn't work, create new SignUpFragment
+            val signUpFragment = SignUpFragment()
+            requireActivity().supportFragmentManager.beginTransaction()
+                .replace(android.R.id.content, signUpFragment)
+                .commit()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error navigating to SignUpFragment: ${e.message}")
+        }
+    }
+
     private fun resendVerificationCode() {
-        val email = SharedPrefManager.getInstance(requireContext()).getEmail()
+        // Use the stored email from class variable
+        val email = userEmail ?: SharedPrefManager.getInstance(requireContext()).getEmail()
+
         if (email == null) {
-            Toast.makeText(requireContext(), "Session expired. Please sign up again.", Toast.LENGTH_SHORT).show()
+            Log.e(TAG, "Email is null in resendVerificationCode")
+            Toast.makeText(requireContext(),
+                "Session expired. Please sign up again.",
+                Toast.LENGTH_SHORT).show()
+            navigateToSignUp()
             return
         }
 
-        showLoading(true)
         Log.d(TAG, "Resending code to: $email")
+        showLoading(true)
 
         RetrofitClient.instance.resendVerification(email).enqueue(object : Callback<Void> {
             override fun onResponse(call: Call<Void>, response: Response<Void>) {
@@ -293,10 +391,12 @@ class VerifyAccountFragment : Fragment() {
 
             override fun onFailure(call: Call<Void>, t: Throwable) {
                 showLoading(false)
-                Log.e(TAG, "Network error: ${t.message}")
+                Log.e(TAG, "Network error type: ${t.javaClass.simpleName}")
+                Log.e(TAG, "Network error message: ${t.message}")
+                Log.e(TAG, "Network error cause: ${t.cause}")
                 Toast.makeText(requireContext(),
-                    "Network error. Please check your connection.",
-                    Toast.LENGTH_SHORT).show()
+                    "Error: ${t.javaClass.simpleName} - ${t.message}",
+                    Toast.LENGTH_LONG).show()
             }
         })
     }
@@ -334,7 +434,9 @@ class VerifyAccountFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
-        timer.cancel()
+        if (::timer.isInitialized) {
+            timer.cancel()
+        }
         _binding = null
     }
 }

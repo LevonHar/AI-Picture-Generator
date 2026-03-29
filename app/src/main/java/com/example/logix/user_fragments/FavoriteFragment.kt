@@ -1,35 +1,99 @@
 package com.example.logix.user_fragments
 
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.logix.R
-import com.example.logix.adapter.LogoAdapter
+import com.example.logix.adapter.EditedLogoAdapter
+import com.example.logix.adapter.LogoNetworkAdapter
+import com.example.logix.viewmodel.EditedLogosViewModel
 import com.example.logix.viewmodel.FavoriteViewModel
 
 class FavoriteFragment : Fragment() {
 
-    private lateinit var recyclerView: RecyclerView
+    private lateinit var favRecyclerView: RecyclerView
+    private lateinit var changedRecyclerView: RecyclerView
+    private lateinit var adapter: LogoNetworkAdapter
+    private lateinit var editedLogoAdapter: EditedLogoAdapter
+
     private val favoriteViewModel: FavoriteViewModel by activityViewModels()
+    private val editedLogosViewModel: EditedLogosViewModel by activityViewModels()
+    private val baseUrl = "http://192.168.10.48:8080"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_favorite, container, false)
-        recyclerView = view.findViewById(R.id.favRecycler)
-        recyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
-        favoriteViewModel.favoriteLogos.observe(viewLifecycleOwner) { favorites ->
-            recyclerView.adapter = LogoAdapter(favorites, favoriteViewModel, isFavoriteList = true)
-        }
+        // --- Favorites RecyclerView ---
+        favRecyclerView = view.findViewById(R.id.favRecycler)
+        favRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
+        adapter = LogoNetworkAdapter(
+            logos = emptyList(),
+            baseUrl = baseUrl,
+            onFavoriteToggle = { logo, addToFav ->
+                favoriteViewModel.toggleFavorite(logo, addToFav)
+                updateFavoritesList()
+                Toast.makeText(
+                    requireContext(),
+                    if (addToFav) "Added to Favorites" else "Removed from Favorites",
+                    Toast.LENGTH_SHORT
+                ).show()
+            },
+            favoriteIds = emptySet()
+        )
+        favRecyclerView.adapter = adapter
+
+        // --- Edited Logos RecyclerView ---
+        changedRecyclerView = view.findViewById(R.id.changedRecycler)
+        changedRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
+
+        editedLogoAdapter = EditedLogoAdapter(
+            entries = emptyList(),
+            onRemove = { entry ->
+                editedLogosViewModel.removeEditedLogo(entry.sourceId)
+            }
+        )
+        changedRecyclerView.adapter = editedLogoAdapter
+
+        observeFavorites()
+        observeEditedLogos()
 
         return view
+    }
+
+    private fun observeFavorites() {
+        favoriteViewModel.favoriteNetworkLogos.observe(viewLifecycleOwner) {
+            updateFavoritesList()
+        }
+    }
+
+    private fun observeEditedLogos() {
+        editedLogosViewModel.editedLogos.observe(viewLifecycleOwner) { entries ->
+            editedLogoAdapter.updateEntries(entries)
+        }
+    }
+
+    private fun updateFavoritesList() {
+        val favorites = favoriteViewModel.favoriteNetworkLogos.value ?: emptyList()
+        val favoriteIds = favorites.map { it.id }.toSet()
+        adapter.updateLogosWithFavorites(favorites, favoriteIds)
+        if (favorites.isEmpty()) {
+            Toast.makeText(requireContext(), "No favorites yet", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        updateFavoritesList()
+        editedLogosViewModel.loadEditedLogos() // refresh on return from EditLogoActivity
     }
 }

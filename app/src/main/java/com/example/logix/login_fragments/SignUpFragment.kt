@@ -4,11 +4,14 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.text.method.HideReturnsTransformationMethod
+import android.text.method.PasswordTransformationMethod
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.example.logix.R
 import com.example.logix.UserActivity
@@ -16,6 +19,7 @@ import com.example.logix.api.RetrofitClient
 import com.example.logix.databinding.FragmentSignUpBinding
 import com.example.logix.models.SignUpRequest
 import com.example.logix.models.SignUpResponse
+import com.example.logix.models.VerifyRequest
 import com.example.logix.utils.SharedPrefManager
 import org.json.JSONArray
 import retrofit2.Call
@@ -26,6 +30,13 @@ class SignUpFragment : Fragment() {
 
     private lateinit var binding: FragmentSignUpBinding
     private val TAG = "SignUpFragment"
+    private var signUpEmail: String = ""
+    private var signUpUsername: String = ""
+    private var signUpPassword: String = ""
+
+    // Password visibility flags
+    private var isPasswordVisible = false
+    private var isRepeatPasswordVisible = false
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,6 +50,7 @@ class SignUpFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         setupSignUp()
         setupTextWatchers()
+        setupPasswordVisibilityToggles()
     }
 
     private fun setupSignUp() {
@@ -54,6 +66,43 @@ class SignUpFragment : Fragment() {
         }
     }
 
+    private fun setupPasswordVisibilityToggles() {
+        // Toggle for password field
+        binding.ivPasswordVisibility.setOnClickListener {
+            isPasswordVisible = !isPasswordVisible
+            togglePasswordVisibility(
+                editText = binding.etPassword,
+                imageView = binding.ivPasswordVisibility,
+                isVisible = isPasswordVisible
+            )
+        }
+
+        // Toggle for repeat password field
+        binding.ivRepeatPasswordVisibility.setOnClickListener {
+            isRepeatPasswordVisible = !isRepeatPasswordVisible
+            togglePasswordVisibility(
+                editText = binding.etRepeatPassword,
+                imageView = binding.ivRepeatPasswordVisibility,
+                isVisible = isRepeatPasswordVisible
+            )
+        }
+    }
+
+    private fun togglePasswordVisibility(editText: android.widget.EditText, imageView: android.widget.ImageView, isVisible: Boolean) {
+        if (isVisible) {
+            // Show password
+            editText.transformationMethod = HideReturnsTransformationMethod.getInstance()
+            imageView.setImageResource(R.drawable.ic_eye_open)
+        } else {
+            // Hide password
+            editText.transformationMethod = PasswordTransformationMethod.getInstance()
+            imageView.setImageResource(R.drawable.ic_eye_closed)
+        }
+
+        // Move cursor to the end of the text
+        editText.setSelection(editText.text.length)
+    }
+
     private fun setupTextWatchers() {
         binding.etUsername.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -61,6 +110,7 @@ class SignUpFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!s.isNullOrEmpty()) {
                     binding.userNameLayout.setBackgroundResource(R.drawable.edit_text_background)
+                    binding.etUsername.error = null
                 }
             }
         })
@@ -71,6 +121,7 @@ class SignUpFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!s.isNullOrEmpty() && android.util.Patterns.EMAIL_ADDRESS.matcher(s).matches()) {
                     binding.emailLayout.setBackgroundResource(R.drawable.edit_text_background)
+                    binding.etEmail.error = null
                 }
             }
         })
@@ -81,6 +132,7 @@ class SignUpFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!s.isNullOrEmpty()) {
                     binding.passwordLayout.setBackgroundResource(R.drawable.edit_text_background)
+                    binding.etPassword.error = null
                 }
             }
         })
@@ -91,6 +143,7 @@ class SignUpFragment : Fragment() {
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 if (!s.isNullOrEmpty()) {
                     binding.repeatPasswordLayout.setBackgroundResource(R.drawable.edit_text_background)
+                    binding.etRepeatPassword.error = null
                 }
             }
         })
@@ -156,10 +209,14 @@ class SignUpFragment : Fragment() {
     }
 
     private fun performSignUp() {
+        signUpUsername = binding.etUsername.text.toString().trim()
+        signUpEmail = binding.etEmail.text.toString().trim()
+        signUpPassword = binding.etPassword.text.toString().trim()
+
         val signUpRequest = SignUpRequest(
-            userName = binding.etUsername.text.toString().trim(),
-            email = binding.etEmail.text.toString().trim(),
-            password = binding.etPassword.text.toString().trim(),
+            userName = signUpUsername,
+            email = signUpEmail,
+            password = signUpPassword,
             repeatPassword = binding.etRepeatPassword.text.toString().trim()
         )
 
@@ -173,30 +230,14 @@ class SignUpFragment : Fragment() {
                 when (response.code()) {
                     201 -> {
                         response.body()?.let { signUpResponse ->
-                            Log.d(TAG, "Signup successful: ${signUpResponse.userName}")
-
-                            // Save user info directly (assuming the response contains token)
-                            // You might need to adjust this based on your actual SignUpResponse structure
-                            SharedPrefManager.getInstance(requireContext()).saveUserInfo(
-                                signUpResponse.userId.toString(),
-                                signUpResponse.userName,
-                                signUpRequest.email
-                            )
-
-                            // If your API returns a token in signup response, save it
-                            // signUpResponse.token?.let {
-                            //     SharedPrefManager.getInstance(requireContext()).saveToken(it)
-                            // }
+                            Log.d(TAG, "Signup initiated successfully. Verification code sent to email.")
 
                             Toast.makeText(requireContext(),
-                                "Account created successfully!",
+                                "Verification code sent to ${signUpEmail}",
                                 Toast.LENGTH_LONG).show()
 
-                            // Navigate directly to UserActivity
-                            val intent = Intent(requireContext(), UserActivity::class.java)
-                            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                            startActivity(intent)
-                            requireActivity().finish()
+                            // Navigate to VerifyAccountFragment with email
+                            navigateToVerification()
                         }
                     }
                     400 -> handleErrorResponse(response)
@@ -210,9 +251,10 @@ class SignUpFragment : Fragment() {
                     }
                     else -> {
                         Log.e(TAG, "Error response code: ${response.code()}")
+                        val errorBody = response.errorBody()?.string()
                         Toast.makeText(requireContext(),
-                            "Signup failed. Please try again.",
-                            Toast.LENGTH_SHORT).show()
+                            errorBody ?: "Signup failed. Please try again.",
+                            Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -225,6 +267,24 @@ class SignUpFragment : Fragment() {
                     Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    private fun navigateToVerification() {
+        // Navigate to VerifyAccountFragment
+        val verifyFragment = VerifyAccountFragment()
+
+        // Pass the email to the verification fragment
+        val bundle = Bundle()
+        bundle.putString("email", signUpEmail)
+        bundle.putString("username", signUpUsername)
+        bundle.putString("password", signUpPassword)
+        verifyFragment.arguments = bundle
+
+        // Replace the current fragment with verification fragment
+        requireActivity().supportFragmentManager.beginTransaction()
+            .replace(R.id.fragmentContainer, verifyFragment)
+            .addToBackStack(null)
+            .commit()
     }
 
     private fun handleErrorResponse(response: Response<SignUpResponse>) {
@@ -251,6 +311,16 @@ class SignUpFragment : Fragment() {
 
     private fun showLoading(show: Boolean) {
         binding.buttonSignIn.isEnabled = !show
-        binding.buttonSignIn.text = if (show) "Please wait..." else "SignUp"
+        binding.buttonSignIn.text = if (show) "Sending verification code..." else "Sign Up"
+
+        // Optionally disable other inputs during loading
+        binding.etUsername.isEnabled = !show
+        binding.etEmail.isEnabled = !show
+        binding.etPassword.isEnabled = !show
+        binding.etRepeatPassword.isEnabled = !show
+
+        // Disable password visibility toggles during loading
+        binding.ivPasswordVisibility.isEnabled = !show
+        binding.ivRepeatPasswordVisibility.isEnabled = !show
     }
 }

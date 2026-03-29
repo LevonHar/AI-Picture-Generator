@@ -159,16 +159,34 @@
             </LinearLayout>
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/forgotPasswordText"
-            android:layout_width="wrap_content"
+        <!-- Combined row for Remember Me and Forgot Password -->
+        <LinearLayout
+            android:id="@+id/rememberForgotLayout"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:text="Forgot Password?"
-            android:textColor="#639CF1"
-            android:textSize="15dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/passwordLayout" />
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/passwordLayout">
+
+            <androidx.appcompat.widget.AppCompatCheckBox
+                android:id="@+id/cbRememberMe"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Remember Me"
+                android:textColor="@color/black" />
+
+            <TextView
+                android:id="@+id/forgotPasswordText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Forgot Password?"
+                android:textColor="#639CF1"
+                android:textSize="15dp" />
+        </LinearLayout>
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/buttonLogIn"
@@ -181,7 +199,7 @@
             android:textColor="#F3F4F6"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/forgotPasswordText" />
+            app:layout_constraintTop_toBottomOf="@+id/rememberForgotLayout" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
@@ -200,10 +218,7 @@
             android:layout_marginEnd="5dp"
             android:text="Don’t have an account?"
             android:textColor="#9CA3AF"
-            android:textSize="15dp"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+            android:textSize="15dp" />
 
         <TextView
             android:id="@+id/textSignUp"
@@ -212,10 +227,7 @@
             android:text="SignUp"
             android:textColor="#639CF1"
             android:textSize="18dp"
-            android:textStyle="bold"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/constraintLayout" />
+            android:textStyle="bold" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
