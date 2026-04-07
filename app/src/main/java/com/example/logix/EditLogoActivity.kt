@@ -75,6 +75,7 @@ class EditLogoActivity : AppCompatActivity() {
         loadLogoImage()
         setupImageAdjustmentControls()
         setupToolbar()
+        setupHelpTooltips()
 
         binding.addTextButton.setOnClickListener {
             showTextOptionsDialog()
@@ -86,6 +87,95 @@ class EditLogoActivity : AppCompatActivity() {
 
         setupUndoRedoButtons()
         checkPermissions()
+    }
+
+    // Add this method to setup help tooltips
+    private fun setupHelpTooltips() {
+
+        // Rotation help
+        binding.helpRotation.setOnClickListener {
+            showHelpDialog(
+                "Rotation",
+                "Rotate your logo from 0° to 360°.\n\n" +
+                        "• 0° = No rotation\n" +
+                        "• 90° = Quarter turn\n" +
+                        "• 180° = Half turn\n" +
+                        "• 270° = Three-quarter turn\n" +
+                        "• 360° = Full rotation\n\n" +
+                        "Use the slider or type a specific value."
+            )
+        }
+
+        // Scale help
+        binding.helpScale.setOnClickListener {
+            showHelpDialog(
+                "Scale",
+                "Zoom in or out on your logo.\n\n" +
+                        "• 50% = Half size\n" +
+                        "• 100% = Original size\n" +
+                        "• 150% = 1.5x larger\n" +
+                        "• 200% = Double size\n\n" +
+                        "The logo maintains its aspect ratio when scaled."
+            )
+        }
+
+        // Opacity help
+        binding.helpOpacity.setOnClickListener {
+            showHelpDialog(
+                "Opacity",
+                "Control how transparent your logo appears.\n\n" +
+                        "• 0% = Completely invisible\n" +
+                        "• 50% = Semi-transparent\n" +
+                        "• 100% = Fully opaque (solid)\n\n" +
+                        "Use lower opacity for watermark effects or to blend with backgrounds."
+            )
+        }
+
+        // Brightness help
+        binding.helpBrightness.setOnClickListener {
+            showHelpDialog(
+                "Brightness",
+                "Adjust the brightness level of your logo.\n\n" +
+                        "• 0% = Completely dark (black)\n" +
+                        "• 100% = Original brightness\n" +
+                        "• 200% = Twice as bright\n\n" +
+                        "Higher values make the image lighter; lower values make it darker."
+            )
+        }
+
+        // Contrast help
+        binding.helpContrast.setOnClickListener {
+            showHelpDialog(
+                "Contrast",
+                "Adjust the difference between light and dark areas.\n\n" +
+                        "• 0% = No contrast (uniform gray)\n" +
+                        "• 100% = Original contrast\n" +
+                        "• 200% = High contrast (more dramatic)\n\n" +
+                        "Higher contrast makes colors more distinct; lower contrast creates a softer look."
+            )
+        }
+
+        // Saturation help
+        binding.helpSaturation.setOnClickListener {
+            showHelpDialog(
+                "Saturation",
+                "Control the intensity of colors.\n\n" +
+                        "• 0% = Grayscale (no color)\n" +
+                        "• 100% = Original saturation\n" +
+                        "• 200% = Vibrant, intense colors\n\n" +
+                        "Lower saturation creates a muted look; higher saturation makes colors pop."
+            )
+        }
+    }
+
+    // Helper method to show help dialog
+    private fun showHelpDialog(title: String, message: String) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Got it", null)
+            .setIcon(android.R.drawable.ic_menu_gallery)
+            .show()
     }
 
     // ================================================================
@@ -526,6 +616,29 @@ class EditLogoActivity : AppCompatActivity() {
     // ================================================================
 
     private fun setupImageAdjustmentControls() {
+        // Set custom colors for sliders
+        ContextCompat.getColorStateList(this, android.R.color.holo_orange_dark)?.let { binding.brightnessSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_orange_light)?.let { binding.brightnessSlider.setTrackTintList(it) }
+
+        ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark)?.let { binding.contrastSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_blue_light)?.let { binding.contrastSlider.setTrackTintList(it) }
+
+        ContextCompat.getColorStateList(this, android.R.color.holo_red_dark)?.let { binding.saturationSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_red_light)?.let { binding.saturationSlider.setTrackTintList(it) }
+
+        // Rotation slider (keep default or set a color)
+        ContextCompat.getColorStateList(this, android.R.color.holo_purple)?.let { binding.rotationSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_purple)?.let { binding.rotationSlider.setTrackTintList(it) }
+
+        // Scale slider (keep default or set a color)
+        ContextCompat.getColorStateList(this, android.R.color.holo_green_dark)?.let { binding.scaleSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_green_light)?.let { binding.scaleSlider.setTrackTintList(it) }
+
+        // Opacity slider (keep default or set a color)
+        ContextCompat.getColorStateList(this, android.R.color.darker_gray)?.let { binding.opacitySlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.darker_gray)?.let { binding.opacitySlider.setTrackTintList(it) }
+
+        // Rest of your existing listener code...
         binding.rotationSlider.addOnChangeListener { _, value, _ ->
             currentRotation = value
             binding.rotationValue.text = "Rotation: ${value.toInt()}°"

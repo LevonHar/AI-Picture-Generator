@@ -88,14 +88,22 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Edit Tools"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="20dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Edit Tools"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+                    </LinearLayout>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/addTextButton"
@@ -123,32 +131,47 @@
                     android:orientation="vertical"
                     android:padding="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Image Adjustments"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="20dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/transparentBgButton"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Transparent Background: OFF"
-                        android:textColor="#6200EE"
-                        app:iconGravity="textStart"
-                        android:layout_marginTop="8dp"
-                        style="@style/Widget.Material3.Button.OutlinedButton" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="20dp">
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Image Adjustments"
+                            android:textSize="20sp"
+                            android:textStyle="bold"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+                    </LinearLayout>
+
+                    <!-- Rotation with help icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Rotation"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Rotation"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpRotation"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
 
                     <com.google.android.material.slider.Slider
                         android:id="@+id/rotationSlider"
@@ -158,7 +181,7 @@
                         android:valueTo="360"
                         android:value="0"
                         android:stepSize="1"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -169,13 +192,30 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Scale with help icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Scale"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Scale"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpScale"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
 
                     <com.google.android.material.slider.Slider
                         android:id="@+id/scaleSlider"
@@ -185,7 +225,7 @@
                         android:valueTo="2.0"
                         android:value="1.0"
                         android:stepSize="0.01"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -196,13 +236,30 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Opacity with help icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Opacity"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Opacity"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpOpacity"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
 
                     <com.google.android.material.slider.Slider
                         android:id="@+id/opacitySlider"
@@ -212,7 +269,7 @@
                         android:valueTo="100"
                         android:value="100"
                         android:stepSize="1"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -223,13 +280,30 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Brightness with help icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Brightness"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Brightness"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpBrightness"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
 
                     <com.google.android.material.slider.Slider
                         android:id="@+id/brightnessSlider"
@@ -239,7 +313,7 @@
                         android:valueTo="200"
                         android:value="100"
                         android:stepSize="1"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -250,13 +324,30 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Contrast with help icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Contrast"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Contrast"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpContrast"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
 
                     <com.google.android.material.slider.Slider
                         android:id="@+id/contrastSlider"
@@ -266,7 +357,7 @@
                         android:valueTo="200"
                         android:value="100"
                         android:stepSize="1"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -277,13 +368,30 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <TextView
-                        android:layout_width="wrap_content"
+                    <!-- Saturation with help icon -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Saturation"
-                        android:textSize="14sp"
-                        android:textColor="@android:color/black"
-                        android:layout_marginBottom="8dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Saturation"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpSaturation"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
 
                     <com.google.android.material.slider.Slider
                         android:id="@+id/saturationSlider"
@@ -293,7 +401,7 @@
                         android:valueTo="200"
                         android:value="100"
                         android:stepSize="1"
-                        android:layout_marginBottom="16dp" />
+                        android:layout_marginBottom="8dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -302,17 +410,26 @@
                         android:id="@+id/saturationValue"
                         android:textSize="12sp"
                         android:textColor="#808080"
-                        android:layout_marginBottom="8dp" />
+                        android:layout_marginBottom="16dp" />
 
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/resetImageButton"
+                    <!-- Reset button with help icon -->
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Reset Image Adjustments"
-                        android:textColor="@android:color/white"
-                        android:backgroundTint="#6200EE"
-                        style="@style/Widget.Material3.Button"
-                        android:layout_marginTop="16dp" />
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginTop="8dp">
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/resetImageButton"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Reset Image Adjustments"
+                            android:textColor="@android:color/white"
+                            android:backgroundTint="#6200EE"
+                            android:layout_weight="1"
+                            style="@style/Widget.Material3.Button" />
+                    </LinearLayout>
 
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>

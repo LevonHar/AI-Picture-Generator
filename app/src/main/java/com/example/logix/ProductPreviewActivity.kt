@@ -267,6 +267,8 @@ class ProductPreviewActivity : AppCompatActivity() {
     }
 
     // Custom View for draggable and scalable logo overlay
+    // In ProductPreviewActivity.kt - Updated LogoOverlayView
+
     inner class LogoOverlayView(
         context: android.content.Context,
         private val originalLogo: Bitmap,
@@ -278,7 +280,12 @@ class ProductPreviewActivity : AppCompatActivity() {
         private var downX = 0f
         private var downY = 0f
         private var isDragging = false
-        private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+            // Ensure we don't draw any background
+            isAntiAlias = true
+            isFilterBitmap = true
+            // No background color set
+        }
 
         // Zoom related variables
         private var currentScale = 1.0f
@@ -296,13 +303,19 @@ class ProductPreviewActivity : AppCompatActivity() {
         private val MIN_SCALE = 0.5f
         private val MAX_SCALE = 3.0f
 
+        // Store the bitmap with preserved transparency
+        private var transparentLogo: Bitmap? = null
+
         init {
             scaleGestureDetector = ScaleGestureDetector(context, ScaleListener())
 
+            // Ensure the logo has transparency support
+            transparentLogo = ensureTransparentBitmap(originalLogo)
+
             // Calculate base logo size (80% of original bitmap size)
             post {
-                baseLogoWidth = (originalLogo.width * 0.8f).toInt()
-                baseLogoHeight = (originalLogo.height * 0.8f).toInt()
+                baseLogoWidth = (transparentLogo!!.width * 0.8f).toInt()
+                baseLogoHeight = (transparentLogo!!.height * 0.8f).toInt()
                 logoWidth = baseLogoWidth
                 logoHeight = baseLogoHeight
                 currentScale = 1.0f
@@ -313,11 +326,62 @@ class ProductPreviewActivity : AppCompatActivity() {
             }
         }
 
+        /**
+         * Ensure the bitmap has an alpha channel and remove any white/black background
+         */
+        private fun ensureTransparentBitmap(bitmap: Bitmap): Bitmap {
+            // Create a new bitmap with ARGB_8888 config to support transparency
+            val result = Bitmap.createBitmap(
+                bitmap.width,
+                bitmap.height,
+                Bitmap.Config.ARGB_8888
+            )
+
+            val canvas = Canvas(result)
+            val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+                isFilterBitmap = true
+                isDither = true
+            }
+
+            // Draw the original bitmap
+            canvas.drawBitmap(bitmap, 0f, 0f, paint)
+
+            // Optional: Remove white background if needed
+            // This is useful if the original logo had a white background
+            removeWhiteBackground(result)
+
+            return result
+        }
+
+        /**
+         * Remove white or near-white background from the logo
+         * This helps if the original image had a solid background
+         */
+        private fun removeWhiteBackground(bitmap: Bitmap) {
+            val width = bitmap.width
+            val height = bitmap.height
+
+            for (x in 0 until width) {
+                for (y in 0 until height) {
+                    val pixel = bitmap.getPixel(x, y)
+                    val red = android.graphics.Color.red(pixel)
+                    val green = android.graphics.Color.green(pixel)
+                    val blue = android.graphics.Color.blue(pixel)
+
+                    // If pixel is white or near-white, make it transparent
+                    if (red > 240 && green > 240 && blue > 240) {
+                        bitmap.setPixel(x, y, android.graphics.Color.TRANSPARENT)
+                    }
+                }
+            }
+        }
+
         private fun getInitialYPosition(): Float {
             return when (productType) {
                 "tshirt" -> height * 0.4f
                 "cup" -> height * 0.35f
                 "cart" -> height * 0.45f
+                "wall" -> height * 0.4f
                 else -> height * 0.4f
             }
         }
@@ -333,15 +397,33 @@ class ProductPreviewActivity : AppCompatActivity() {
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
 
+            // Clear the canvas with transparent color
+            canvas.drawColor(android.graphics.Color.TRANSPARENT)
+
             if (logoX >= 0 && logoY >= 0 && logoWidth > 0 && logoHeight > 0) {
-                // Create scaled bitmap with current scale
-                val scaledLogo = Bitmap.createScaledBitmap(
-                    originalLogo,
-                    logoWidth,
-                    logoHeight,
-                    true
-                )
-                canvas.drawBitmap(scaledLogo, logoX, logoY, paint)
+                transparentLogo?.let { logo ->
+                    // Create scaled bitmap with current scale while preserving transparency
+                    val scaledLogo = Bitmap.createScaledBitmap(
+                        logo,
+                        logoWidth,
+                        logoHeight,
+                        true
+                    )
+
+                    // Draw with a paint that preserves alpha channel
+                    val drawPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG).apply {
+                        isAntiAlias = true
+                        isFilterBitmap = true
+                        isDither = true
+                    }
+
+                    canvas.drawBitmap(scaledLogo, logoX, logoY, drawPaint)
+
+                    // Recycle scaled bitmap to prevent memory leaks
+                    if (scaledLogo != logo) {
+                        scaledLogo.recycle()
+                    }
+                }
             }
         }
 
@@ -468,6 +550,12 @@ class ProductPreviewActivity : AppCompatActivity() {
         // Get current logo position and scale
         fun getLogoState(): Triple<Float, Float, Float> {
             return Triple(logoX, logoY, currentScale)
+        }
+
+        override fun onDetachedFromWindow() {
+            super.onDetachedFromWindow()
+            // Clean up bitmaps to prevent memory leaks
+            transparentLogo?.recycle()
         }
     }
 }

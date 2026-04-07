@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
@@ -18,12 +19,15 @@ class LogoNetworkAdapter(
     private var logos: List<LogoItem>,
     private val baseUrl: String,
     private val onFavoriteToggle: (LogoItem, Boolean) -> Unit,
-    private var favoriteIds: Set<Long> = emptySet()
+    private var favoriteIds: Set<Long> = emptySet(),
+    private var showCount: Boolean = false  // Add this parameter
 ) : RecyclerView.Adapter<LogoNetworkAdapter.LogoViewHolder>() {
 
     class LogoViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val image: ImageView = itemView.findViewById(R.id.logoImage)
         val menu: ImageView = itemView.findViewById(R.id.menuIcon)
+        val countContainer: LinearLayout = itemView.findViewById(R.id.countContainer)
+        val countText: TextView = itemView.findViewById(R.id.countText)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LogoViewHolder {
@@ -35,7 +39,7 @@ class LogoNetworkAdapter(
     override fun onBindViewHolder(holder: LogoViewHolder, position: Int) {
         val logo = logos[position]
 
-        // Build full image URL — backend serves files at /api/uploads/{filename}
+        // Build full image URL
         val imageUrl = "$baseUrl/api/uploads/${logo.imageUrl}"
         Glide.with(holder.itemView.context)
             .load(imageUrl)
@@ -43,11 +47,18 @@ class LogoNetworkAdapter(
             .error(android.R.drawable.ic_menu_gallery)
             .into(holder.image)
 
+        // Show/hide count container based on showCount flag
+        if (showCount) {
+            holder.countContainer.visibility = View.VISIBLE
+            holder.countText.text = logo.likeCount.toString()
+        } else {
+            holder.countContainer.visibility = View.GONE
+        }
+
         holder.image.setOnClickListener {
             val intent = Intent(holder.itemView.context, EditLogoActivity::class.java)
             intent.putExtra("logo_id", logo.id)
             intent.putExtra("logo_image_url", imageUrl)
-            // Also pass the entire logo object if EditLogoActivity needs more data
             intent.putExtra("logo_category", logo.category)
             intent.putExtra("logo_style", logo.style)
             intent.putExtra("logo_like_count", logo.likeCount)
@@ -74,9 +85,18 @@ class LogoNetworkAdapter(
 
     fun updateFavoriteIds(newFavoriteIds: Set<Long>) {
         favoriteIds = newFavoriteIds
-        // Only refresh visible items to update the menu text
         notifyItemRangeChanged(0, itemCount)
     }
+
+    // Update showCount and logos together
+    fun setShowCount(show: Boolean, newLogos: List<LogoItem>) {
+        showCount = show
+        logos = newLogos
+        notifyDataSetChanged()
+    }
+
+    // Get current showCount value
+    fun isShowingCount(): Boolean = showCount
 
     private fun showBottomSheet(view: View, logo: LogoItem) {
         val dialog = BottomSheetDialog(view.context)
@@ -91,10 +111,8 @@ class LogoNetworkAdapter(
         like.text = if (isFav) "🗑 Remove from Favorites" else "❤️ Add to Favorites"
 
         like.setOnClickListener {
-            // Call the toggle callback
             onFavoriteToggle(logo, !isFav)
 
-            // Update local favoriteIds set for immediate UI feedback
             if (!isFav) {
                 favoriteIds = favoriteIds.toMutableSet().apply { add(logo.id) }
             } else {
@@ -110,7 +128,6 @@ class LogoNetworkAdapter(
         }
 
         info.setOnClickListener {
-            // Show more detailed info
             val infoText = buildString {
                 append("ID: ${logo.id}\n")
                 append("Category: ${logo.category ?: "N/A"}\n")

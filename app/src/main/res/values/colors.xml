@@ -13,4 +13,12 @@
     <color name="blue">#639CF1</color>
     <color name="gray">#9CA3AF</color>
     <color name="purple">#9C27B0</color>
+
+    <color name="slider_brightness">#FF9800</color>  <!-- Orange/Yellow -->
+    <color name="slider_contrast">#2196F3</color>    <!-- Blue -->
+    <color name="slider_saturation">#F44336</color>  <!-- Red -->
+    <color name="slider_rotation">#9C27B0</color>    <!-- Purple -->
+    <color name="slider_scale">#4CAF50</color>       <!-- Green -->
+    <color name="slider_opacity">#9E9E9E</color>     <!-- Gray -->
+    <color name="holo_grey_dark">#9E9E9E</color>     <!-- Gray -->
 </resources>

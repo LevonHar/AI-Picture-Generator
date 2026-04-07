@@ -19,15 +19,31 @@
         android:paddingTop="15dp"
         android:paddingBottom="5dp"/>
 
-    <!-- Favorite RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/favRecycler"
+    <!-- Favorite Section with placeholder -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:background="@drawable/recycler_bg"/>
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/favRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:background="@drawable/recycler_bg"/>
+
+        <TextView
+            android:id="@+id/favEmptyView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="No favorites yet"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="center"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
     <!-- Edited Logos Title -->
     <TextView
@@ -40,15 +56,31 @@
         android:paddingTop="10dp"
         android:paddingBottom="5dp"/>
 
-    <!-- Changed RecyclerView -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/changedRecycler"
+    <!-- Edited Logos Section with placeholder -->
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
-        android:layout_marginStart="15dp"
-        android:layout_marginEnd="15dp"
-        android:layout_marginBottom="10dp"
-        android:background="@drawable/recycler_bg"/>
+        android:layout_weight="1">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/changedRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="15dp"
+            android:layout_marginEnd="15dp"
+            android:layout_marginBottom="10dp"
+            android:background="@drawable/recycler_bg"/>
+
+        <TextView
+            android:id="@+id/changedEmptyView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:text="No edited logos yet"
+            android:textSize="16sp"
+            android:textColor="@android:color/darker_gray"
+            android:gravity="center"
+            android:visibility="gone"/>
+
+    </FrameLayout>
 
 </LinearLayout>

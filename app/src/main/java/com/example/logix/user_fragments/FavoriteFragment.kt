@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -19,6 +20,8 @@ class FavoriteFragment : Fragment() {
 
     private lateinit var favRecyclerView: RecyclerView
     private lateinit var changedRecyclerView: RecyclerView
+    private lateinit var favEmptyView: TextView
+    private lateinit var changedEmptyView: TextView
     private lateinit var adapter: LogoNetworkAdapter
     private lateinit var editedLogoAdapter: EditedLogoAdapter
 
@@ -34,6 +37,7 @@ class FavoriteFragment : Fragment() {
 
         // --- Favorites RecyclerView ---
         favRecyclerView = view.findViewById(R.id.favRecycler)
+        favEmptyView = view.findViewById(R.id.favEmptyView)
         favRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
         adapter = LogoNetworkAdapter(
@@ -54,6 +58,7 @@ class FavoriteFragment : Fragment() {
 
         // --- Edited Logos RecyclerView ---
         changedRecyclerView = view.findViewById(R.id.changedRecycler)
+        changedEmptyView = view.findViewById(R.id.changedEmptyView)
         changedRecyclerView.layoutManager = GridLayoutManager(requireContext(), 2)
 
         editedLogoAdapter = EditedLogoAdapter(
@@ -79,6 +84,7 @@ class FavoriteFragment : Fragment() {
     private fun observeEditedLogos() {
         editedLogosViewModel.editedLogos.observe(viewLifecycleOwner) { entries ->
             editedLogoAdapter.updateEntries(entries)
+            updateChangedEmptyView(entries.isEmpty())
         }
     }
 
@@ -86,8 +92,26 @@ class FavoriteFragment : Fragment() {
         val favorites = favoriteViewModel.favoriteNetworkLogos.value ?: emptyList()
         val favoriteIds = favorites.map { it.id }.toSet()
         adapter.updateLogosWithFavorites(favorites, favoriteIds)
-        if (favorites.isEmpty()) {
-            Toast.makeText(requireContext(), "No favorites yet", Toast.LENGTH_SHORT).show()
+        updateFavEmptyView(favorites.isEmpty())
+    }
+
+    private fun updateFavEmptyView(isEmpty: Boolean) {
+        if (isEmpty) {
+            favRecyclerView.visibility = View.GONE
+            favEmptyView.visibility = View.VISIBLE
+        } else {
+            favRecyclerView.visibility = View.VISIBLE
+            favEmptyView.visibility = View.GONE
+        }
+    }
+
+    private fun updateChangedEmptyView(isEmpty: Boolean) {
+        if (isEmpty) {
+            changedRecyclerView.visibility = View.GONE
+            changedEmptyView.visibility = View.VISIBLE
+        } else {
+            changedRecyclerView.visibility = View.VISIBLE
+            changedEmptyView.visibility = View.GONE
         }
     }
 
