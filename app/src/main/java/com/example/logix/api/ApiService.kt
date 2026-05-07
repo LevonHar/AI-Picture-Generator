@@ -1,6 +1,5 @@
 package com.example.logix.api
 
-import com.example.logix.models.DeleteAccountRequest
 import com.example.logix.models.LogoSearchResponse
 import com.example.logix.models.LoginRequest
 import com.example.logix.models.LoginResponse
@@ -12,7 +11,6 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Body
-import retrofit2.http.DELETE
 import retrofit2.http.Query
 
 interface ApiService {
@@ -54,9 +52,6 @@ interface ApiService {
     fun getTopLogos(
         @Query("limit") limit: Int
     ): Call<LogoSearchResponse>
-
-    @DELETE("/api/public/user/delete/account")
-    fun deleteAccount(@Body request: DeleteAccountRequest): Call<Void>
 
     // NEW: Get all logos sorted by like count
     @GET("/api/public/logo/search/all-by-likes")

@@ -35,6 +35,7 @@ import com.example.logix.models.EditedLogoEntry
 import com.example.logix.models.FontOption
 import com.example.logix.undo.*
 import com.example.logix.utils.EditedLogoRepository
+import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.text.SimpleDateFormat
@@ -58,6 +59,7 @@ class EditLogoActivity : AppCompatActivity() {
 
     private var originalDrawable: Drawable? = null
     private var originalSvg: SVG? = null
+    private var originalSvgContent: String? = null
     private var originalResourceId: Int = 0
     private var originalBitmap: Bitmap? = null
     private var currentBitmap: Bitmap? = null
@@ -296,7 +298,11 @@ class EditLogoActivity : AppCompatActivity() {
         originalResourceId = resourceId
         try {
             val inputStream = resources.openRawResource(resourceId)
-            originalSvg = SVG.getFromInputStream(inputStream)
+            val svgBytes = inputStream.readBytes()
+            inputStream.close()
+
+            originalSvgContent = svgBytes.toString(Charsets.UTF_8)
+            originalSvg = SVG.getFromInputStream(ByteArrayInputStream(svgBytes))
 
             val svgPicture = originalSvg!!.renderToPicture()
             val pictureDrawable = PictureDrawable(svgPicture)
@@ -313,7 +319,6 @@ class EditLogoActivity : AppCompatActivity() {
             currentBitmap    = originalBitmap
             originalDrawable = pictureDrawable
 
-            inputStream.close()
             saveCurrentImageState()
 
         } catch (e: Exception) {
@@ -522,6 +527,7 @@ class EditLogoActivity : AppCompatActivity() {
             Toast.makeText(this, "Failed to save edits: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
+
 
     // ================================================================
     // IMAGE ADJUSTMENTS WITH UNDO
@@ -831,6 +837,7 @@ class EditLogoActivity : AppCompatActivity() {
         textView.text = options.text
         textView.setTextColor(options.color)
         textView.textSize = options.textSize
+        textView.letterSpacing = options.letterSpacing
         textView.rotation = options.rotation
         textView.alpha    = (100 - options.transparency) / 100f
 
@@ -875,6 +882,7 @@ class EditLogoActivity : AppCompatActivity() {
             setText(options.text)
             setTextColor(options.color)
             setTextSize(options.textSize)
+            setLetterSpacing(options.letterSpacing)
             setRotationDegrees(options.rotation)
             setCurveRadius(options.curveRadius)
             setCurveUp(options.curveUp)
@@ -961,6 +969,7 @@ class EditLogoActivity : AppCompatActivity() {
             text          = textView.text.toString(),
             color         = textView.currentTextColor,
             textSize      = textView.textSize / resources.displayMetrics.scaledDensity,
+            letterSpacing = textView.letterSpacing,
             transparency  = ((1 - textView.alpha) * 100).toInt(),
             fontOption    = fontOptions[currentFontIndex],
             rotation      = textView.rotation,
@@ -1002,6 +1011,7 @@ class EditLogoActivity : AppCompatActivity() {
             text          = curvedTextView.getText(),
             color         = curvedTextView.getTextColor(),
             textSize      = curvedTextView.getTextSizeValue(),
+            letterSpacing = curvedTextView.getLetterSpacingValue(),
             transparency  = ((1 - curvedTextView.getTextAlpha()) * 100).toInt(),
             fontOption    = fontOptions[currentFontIndex],
             rotation      = curvedTextView.getRotationDegrees(),
@@ -1029,6 +1039,7 @@ class EditLogoActivity : AppCompatActivity() {
             text          = textView.text.toString(),
             color         = textView.currentTextColor,
             textSize      = textView.textSize / resources.displayMetrics.scaledDensity,
+            letterSpacing = textView.letterSpacing,
             transparency  = ((1 - textView.alpha) * 100).toInt(),
             rotation      = textView.rotation,
             bgColor       = (textView.background as? ColorDrawable)?.color ?: Color.TRANSPARENT,
@@ -1046,6 +1057,7 @@ class EditLogoActivity : AppCompatActivity() {
             text          = options.text,
             color         = options.color,
             textSize      = options.textSize,
+            letterSpacing = options.letterSpacing,
             transparency  = options.transparency,
             rotation      = options.rotation,
             bgColor       = options.bgColor,
@@ -1076,6 +1088,7 @@ class EditLogoActivity : AppCompatActivity() {
         curvedTextView.setText(options.text)
         curvedTextView.setTextColor(options.color)
         curvedTextView.setTextSize(options.textSize)
+        curvedTextView.setLetterSpacing(options.letterSpacing)
         curvedTextView.setTextAlpha((100 - options.transparency) / 100f)
         curvedTextView.setRotationDegrees(options.rotation)
         curvedTextView.setCurveRadius(options.curveRadius)
@@ -1171,7 +1184,8 @@ class EditLogoActivity : AppCompatActivity() {
 
     private fun exportAsSvg() {
         try {
-            if (originalSvg != null) {
+            val svgContent = originalSvgContent
+            if (!svgContent.isNullOrBlank()) {
                 val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
                 val fileName  = "Logo_$timeStamp.svg"
 
@@ -1187,7 +1201,7 @@ class EditLogoActivity : AppCompatActivity() {
                     )
                     uri?.let {
                         contentResolver.openOutputStream(it)?.use { outputStream ->
-                            outputStream.write(originalSvg!!.toString().toByteArray())
+                            outputStream.write(svgContent.toByteArray(Charsets.UTF_8))
                             outputStream.flush()
                             Toast.makeText(this, "SVG saved to Downloads", Toast.LENGTH_LONG).show()
                         }
@@ -1198,7 +1212,7 @@ class EditLogoActivity : AppCompatActivity() {
                     )
                     val svgFile = File(downloadsDir, fileName)
                     FileOutputStream(svgFile).use { outputStream ->
-                        outputStream.write(originalSvg!!.toString().toByteArray())
+                        outputStream.write(svgContent.toByteArray(Charsets.UTF_8))
                         outputStream.flush()
                         Toast.makeText(this, "SVG saved to ${svgFile.absolutePath}", Toast.LENGTH_LONG).show()
                         val mediaScanIntent = Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE)

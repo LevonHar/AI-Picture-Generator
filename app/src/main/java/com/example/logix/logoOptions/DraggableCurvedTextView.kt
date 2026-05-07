@@ -134,6 +134,12 @@ class DraggableCurvedTextView @JvmOverloads constructor(
 
     fun getTextSizeValue(): Float = curvedTextView.getTextSizeValue()
 
+    fun setLetterSpacing(spacing: Float) {
+        curvedTextView.setLetterSpacing(spacing)
+    }
+
+    fun getLetterSpacingValue(): Float = curvedTextView.getLetterSpacingValue()
+
     fun setTypeface(typeface: Typeface?) {
         curvedTextView.setTypeface(typeface)
     }

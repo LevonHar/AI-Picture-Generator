@@ -16,6 +16,7 @@ class CurvedTextView @JvmOverloads constructor(
     private var textColor = Color.BLACK
     private var textSize = 24f
     private var typeface: Typeface? = null
+    private var letterSpacing = 0f
     private var radius = 200f
     private var curveUp = true
     private var rotation = 0f
@@ -61,6 +62,15 @@ class CurvedTextView @JvmOverloads constructor(
     }
 
     fun getCustomTypeface(): Typeface? = typeface
+
+    fun setLetterSpacing(spacing: Float) {
+        letterSpacing = spacing
+        paint.letterSpacing = spacing
+        updateTextWidth()
+        invalidate()
+    }
+
+    fun getLetterSpacingValue(): Float = letterSpacing
 
     fun setRadius(newRadius: Float) {
         radius = newRadius

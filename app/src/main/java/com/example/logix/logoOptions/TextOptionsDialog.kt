@@ -30,6 +30,7 @@ class TextOptionsDialog(
         val text: String,
         val color: Int,
         val textSize: Float,
+        val letterSpacing: Float,
         val transparency: Int,
         val fontOption: FontOption,
         val rotation: Float,
@@ -47,6 +48,7 @@ class TextOptionsDialog(
     // State variables
     private var selectedColor: Int = Color.BLACK
     private var selectedTextSize: Float = 24f
+    private var selectedLetterSpacing: Float = 0f
     private var selectedTransparency: Int = 0
     private var selectedFont: FontOption = fontOptions[0]
     private var selectedRotation: Float = 0f
@@ -78,6 +80,7 @@ class TextOptionsDialog(
     private fun initializeDefaultValues() {
         selectedColor = Color.BLACK
         selectedTextSize = 24f
+        selectedLetterSpacing = 0f
         selectedTransparency = 0
         selectedFont = fontOptions[0]
         selectedRotation = 0f
@@ -93,6 +96,7 @@ class TextOptionsDialog(
         binding.previewText.textSize = 24f
         binding.previewText.text = "Preview Text"
         binding.previewText.alpha = 1.0f
+        binding.previewText.letterSpacing = selectedLetterSpacing
         binding.previewText.setBackgroundColor(Color.TRANSPARENT)
         binding.previewText.rotation = 0f
         applyFontToPreview(binding.previewText, selectedFont)
@@ -102,6 +106,7 @@ class TextOptionsDialog(
         existingText?.let { options ->
             selectedColor = options.color
             selectedTextSize = options.textSize
+            selectedLetterSpacing = options.letterSpacing
             selectedTransparency = options.transparency
             selectedFont = options.fontOption
             selectedRotation = options.rotation
@@ -123,6 +128,7 @@ class TextOptionsDialog(
                 binding.previewText.textSize = selectedTextSize
                 binding.previewText.text = options.text
                 binding.previewText.alpha = (100 - selectedTransparency) / 100f
+                binding.previewText.letterSpacing = selectedLetterSpacing
                 binding.previewText.rotation = selectedRotation
                 applyFontToPreview(binding.previewText, selectedFont)
 
@@ -150,6 +156,7 @@ class TextOptionsDialog(
         binding.curveRadiusSlider.value = curveRadius
         binding.curveRadiusValue.text = curveRadius.toInt().toString()
         binding.textSizeSlider.value = selectedTextSize
+        binding.textSpacingSlider.value = selectedLetterSpacing
 
         // Set curve toggle state
         binding.curveToggle.isChecked = isCurved
@@ -200,6 +207,16 @@ class TextOptionsDialog(
                 curvedPreview?.setTextSize(value)
             } else {
                 binding.previewText.textSize = value
+            }
+        }
+
+        // Text spacing slider
+        binding.textSpacingSlider.addOnChangeListener { _, value, _ ->
+            selectedLetterSpacing = value
+            if (isCurved && curvedPreview != null) {
+                curvedPreview?.setLetterSpacing(value)
+            } else {
+                binding.previewText.letterSpacing = value
             }
         }
 
@@ -274,6 +291,7 @@ class TextOptionsDialog(
                     text = text,
                     color = selectedColor,
                     textSize = selectedTextSize,
+                    letterSpacing = selectedLetterSpacing,
                     transparency = selectedTransparency,
                     fontOption = selectedFont,
                     rotation = selectedRotation,
@@ -418,6 +436,7 @@ class TextOptionsDialog(
             setText(displayText)
             setTextColor(selectedColor)
             setTextSize(selectedTextSize)
+            setLetterSpacing(selectedLetterSpacing)
             alpha = (100 - selectedTransparency) / 100f
             setRadius(curveRadius)
             setCurveUp(curveUp)
@@ -442,6 +461,7 @@ class TextOptionsDialog(
             text = displayText
             setTextColor(selectedColor)
             textSize = selectedTextSize
+            letterSpacing = selectedLetterSpacing
             alpha = (100 - selectedTransparency) / 100f
             rotation = selectedRotation
         }

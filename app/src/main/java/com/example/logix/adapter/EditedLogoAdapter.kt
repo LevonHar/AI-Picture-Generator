@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -21,6 +22,7 @@ class EditedLogoAdapter(
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val image: ImageView = view.findViewById(R.id.logoImage)
         val menu: ImageView = view.findViewById(R.id.menuIcon)
+        val countContainer: LinearLayout = view.findViewById(R.id.countContainer)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -40,6 +42,9 @@ class EditedLogoAdapter(
         } else {
             holder.image.setImageResource(android.R.drawable.ic_menu_gallery)
         }
+
+        // Edited logos should not show network like counts.
+        holder.countContainer.visibility = View.GONE
 
         // Click image → open EditLogoActivity re-loaded with the original source
         holder.image.setOnClickListener {

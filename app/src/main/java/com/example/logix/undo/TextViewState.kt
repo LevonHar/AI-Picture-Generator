@@ -11,6 +11,7 @@ data class TextViewState(
     val text: String,
     val color: Int,
     val textSize: Float,
+    val letterSpacing: Float,
     val transparency: Int,
     val rotation: Float,
     val bgColor: Int,
@@ -26,6 +27,7 @@ data class CurvedTextViewState(
     val text: String,
     val color: Int,
     val textSize: Float,
+    val letterSpacing: Float,
     val transparency: Int,
     val rotation: Float,
     val bgColor: Int,
@@ -103,6 +105,7 @@ class UpdateTextViewCommand(
         textView.text = state.text
         textView.setTextColor(state.color)
         textView.textSize = state.textSize
+        textView.letterSpacing = state.letterSpacing
         textView.alpha = (100 - state.transparency) / 100f
         textView.rotation = state.rotation
         textView.x = state.x
