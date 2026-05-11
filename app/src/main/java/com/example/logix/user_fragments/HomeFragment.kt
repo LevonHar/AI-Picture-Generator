@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatButton
+import androidx.core.view.forEach
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.GridLayoutManager
@@ -17,6 +18,8 @@ import com.example.logix.api.RetrofitClient
 import com.example.logix.models.LogoItem
 import com.example.logix.models.LogoSearchResponse
 import com.example.logix.viewmodel.FavoriteViewModel
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipGroup
 import com.google.android.material.textfield.MaterialAutoCompleteTextView
 import retrofit2.Call
 import retrofit2.Callback
@@ -33,10 +36,13 @@ class HomeFragment : Fragment() {
     private var selectedCategory: String? = null
     private var selectedShape: String? = null
     private var selectedStyle: String? = null
-    private var selectedColor: String? = null
+    private val selectedColors = mutableSetOf<String>() // Changed to Set for multiple colors
 
-    private val baseUrl = "http://192.168.10.48:8080"
+    private val baseUrl = "http://192.168.10.48:8081"
     private var isPopularMode = false
+
+    // Add chip group reference
+    private lateinit var selectedColorsChipGroup: ChipGroup
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -47,6 +53,7 @@ class HomeFragment : Fragment() {
         initializeViews(view)
         setupRecyclerView()
         setupDropdownsWithListeners(view)
+        setupSelectedColorsChipGroup(view)
         setupSearchButton()
         setupPopularButton()
 
@@ -57,6 +64,7 @@ class HomeFragment : Fragment() {
         recyclerView = view.findViewById(R.id.recyclerView)
         searchButton = view.findViewById(R.id.search)
         popularButton = view.findViewById(R.id.popular)
+        selectedColorsChipGroup = view.findViewById(R.id.selectedColorsChipGroup)
     }
 
     private fun setupRecyclerView() {
@@ -119,12 +127,72 @@ class HomeFragment : Fragment() {
         val dropdown4: MaterialAutoCompleteTextView = view.findViewById(R.id.dropdown4)
         val colors = arrayOf(
             "RED", "BLUE", "GREEN", "YELLOW", "ORANGE", "PURPLE", "PINK",
-            "BROWN", "BLACK", "WHITE", "GRAY", "GOLD", "SILVER", "MULTICOLOR"
+            "BROWN", "BLACK", "WHITE", "GRAY", "GOLD", "SILVER", "MULTICOLOR", "TURQUOISE"
         )
         dropdown4.setAdapter(ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, colors))
+
+        // Update to handle multiple color selection
         dropdown4.setOnItemClickListener { _, _, position, _ ->
-            selectedColor = colors[position]
+            val selectedColor = colors[position]
+            if (selectedColors.contains(selectedColor)) {
+                // If already selected, remove it
+                selectedColors.remove(selectedColor)
+                Toast.makeText(requireContext(), "Removed $selectedColor", Toast.LENGTH_SHORT).show()
+            } else {
+                // Add new color
+                selectedColors.add(selectedColor)
+                Toast.makeText(requireContext(), "Added $selectedColor", Toast.LENGTH_SHORT).show()
+            }
+            updateSelectedColorsChips()
+            dropdown4.setText("") // Clear the dropdown text
             if (isPopularMode) exitPopularMode()
+        }
+    }
+
+    private fun setupSelectedColorsChipGroup(view: View) {
+        selectedColorsChipGroup = view.findViewById(R.id.selectedColorsChipGroup)
+    }
+
+    private fun updateSelectedColorsChips() {
+        selectedColorsChipGroup.removeAllViews()
+
+        selectedColors.forEach { color ->
+            val chip = Chip(requireContext()).apply {
+                text = color
+                isCloseIconVisible = true
+                setOnCloseIconClickListener {
+                    selectedColors.remove(color)
+                    updateSelectedColorsChips()
+                    if (isPopularMode) exitPopularMode()
+                }
+                // Optional: Set chip background color based on color name
+                setChipBackgroundColorResource(getColorResourceForColor(color))
+            }
+            selectedColorsChipGroup.addView(chip)
+        }
+
+        // Show/hide chip group based on whether there are selected colors
+        selectedColorsChipGroup.visibility = if (selectedColors.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    private fun getColorResourceForColor(colorName: String): Int {
+        return when (colorName.uppercase()) {
+            "RED" -> R.color.red
+            "BLUE" -> R.color.blue_cl
+            "GREEN" -> R.color.green
+            "YELLOW" -> R.color.yellow
+            "ORANGE" -> R.color.orange
+            "PURPLE" -> R.color.purple
+            "PINK" -> R.color.pink
+            "BROWN" -> R.color.brown
+            "BLACK" -> R.color.black
+            "WHITE" -> R.color.white
+            "GRAY" -> R.color.gray_cl
+            "GOLD" -> R.color.gold
+            "SILVER" -> R.color.silver
+            "MULTICOLOR" -> R.color.multicolor
+            "TURQUOISE" -> R.color.turquoise
+            else -> R.color.default_chip
         }
     }
 
@@ -208,7 +276,8 @@ class HomeFragment : Fragment() {
         selectedCategory = null
         selectedShape = null
         selectedStyle = null
-        selectedColor = null
+        selectedColors.clear()
+        updateSelectedColorsChips()
 
         // Clear dropdown texts
         view?.let { view ->
@@ -239,12 +308,19 @@ class HomeFragment : Fragment() {
             isPopularMode = false
         }
 
-        // Use the appropriate search method based on whether color is selected
-        val call = if (selectedColor != null) {
+        // Convert selected colors set to comma-separated string for API
+        val colorsParam = if (selectedColors.isNotEmpty()) {
+            selectedColors.joinToString(",")
+        } else {
+            null
+        }
+
+        // Use the appropriate search method based on whether colors are selected
+        val call = if (colorsParam != null) {
             RetrofitClient.instance.searchLogosWithColor(
                 category = selectedCategory,
                 shape = selectedShape,
-                colors = selectedColor,
+                colors = colorsParam, // Send comma-separated colors
                 style = selectedStyle
             )
         } else {
@@ -271,13 +347,16 @@ class HomeFragment : Fragment() {
 
                         val favoriteIds = favoriteViewModel.favoriteNetworkLogos.value?.map { it.id }?.toSet() ?: emptySet()
 
-                        // FIX: Set showCount = true to display like counts in search results
+                        // Set showCount = true to display like counts in search results
                         networkAdapter.setShowCount(true, logos)
                         networkAdapter.updateFavoriteIds(favoriteIds)
 
+                        val colorMessage = if (selectedColors.isNotEmpty()) {
+                            " with colors: ${selectedColors.joinToString(", ")}"
+                        } else ""
                         Toast.makeText(
                             requireContext(),
-                            "${logos.size} logo(s) found",
+                            "${logos.size} logo(s) found$colorMessage",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {

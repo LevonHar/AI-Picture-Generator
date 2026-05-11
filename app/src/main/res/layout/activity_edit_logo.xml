@@ -148,7 +148,95 @@
                             android:layout_weight="1" />
                     </LinearLayout>
 
-                    <!-- Rotation with help icon -->
+                    <!-- X Position - MOVED UP -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="X Position"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpPositionX"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/positionXSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="-200"
+                        android:valueTo="200"
+                        android:value="0"
+                        android:stepSize="1"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="X: 0px"
+                        android:id="@+id/positionXValue"
+                        android:textSize="12sp"
+                        android:textColor="#808080"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Y Position - MOVED UP -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="8dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:text="Y Position"
+                            android:textSize="14sp"
+                            android:textColor="@android:color/black"
+                            android:layout_weight="1" />
+
+                        <ImageView
+                            android:id="@+id/helpPositionY"
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:src="@android:drawable/ic_menu_help"
+                            android:contentDescription="Help"
+                            android:padding="2dp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/positionYSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="-200"
+                        android:valueTo="200"
+                        android:value="0"
+                        android:stepSize="1"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Y: 0px"
+                        android:id="@+id/positionYValue"
+                        android:textSize="12sp"
+                        android:textColor="#808080"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Rotation -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -192,7 +280,7 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Scale with help icon -->
+                    <!-- Scale -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -236,7 +324,7 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Opacity with help icon -->
+                    <!-- Opacity -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -280,7 +368,7 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Brightness with help icon -->
+                    <!-- Brightness -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -324,7 +412,7 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Contrast with help icon -->
+                    <!-- Contrast -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -368,7 +456,7 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Saturation with help icon -->
+                    <!-- Saturation -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -412,7 +500,89 @@
                         android:textColor="#808080"
                         android:layout_marginBottom="16dp" />
 
-                    <!-- Reset button with help icon -->
+                    <!-- Color Channels -->
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Red"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/redSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="200"
+                        android:value="100"
+                        android:stepSize="1"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/redValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Red: 100%"
+                        android:textSize="12sp"
+                        android:textColor="#808080"
+                        android:layout_marginBottom="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Green"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/greenSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="200"
+                        android:value="100"
+                        android:stepSize="1"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/greenValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Green: 100%"
+                        android:textSize="12sp"
+                        android:textColor="#808080"
+                        android:layout_marginBottom="16dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Blue"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:layout_marginBottom="8dp" />
+
+                    <com.google.android.material.slider.Slider
+                        android:id="@+id/blueSlider"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:valueFrom="0"
+                        android:valueTo="200"
+                        android:value="100"
+                        android:stepSize="1"
+                        android:layout_marginBottom="8dp" />
+
+                    <TextView
+                        android:id="@+id/blueValue"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Blue: 100%"
+                        android:textSize="12sp"
+                        android:textColor="#808080"
+                        android:layout_marginBottom="16dp" />
+
+                    <!-- Reset button -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"

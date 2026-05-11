@@ -27,7 +27,7 @@ class FavoriteFragment : Fragment() {
 
     private val favoriteViewModel: FavoriteViewModel by activityViewModels()
     private val editedLogosViewModel: EditedLogosViewModel by activityViewModels()
-    private val baseUrl = "http://192.168.10.48:8080"
+    private val baseUrl = "http://192.168.10.48:8081"
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

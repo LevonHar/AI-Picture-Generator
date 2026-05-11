@@ -21,4 +21,17 @@
     <color name="slider_scale">#4CAF50</color>       <!-- Green -->
     <color name="slider_opacity">#9E9E9E</color>     <!-- Gray -->
     <color name="holo_grey_dark">#9E9E9E</color>     <!-- Gray -->
+
+    <color name="blue_cl">#0000FF</color>
+    <color name="green">#008000</color>
+    <color name="yellow">#FFFF00</color>
+    <color name="orange">#FFA500</color>
+    <color name="pink">#FFC0CB</color>
+    <color name="brown">#A52A2A</color>
+    <color name="gray_cl">#808080</color>
+    <color name="gold">#FFD700</color>
+    <color name="silver">#C0C0C0</color>
+    <color name="multicolor">#FF69B4</color>
+    <color name="turquoise">#40E0D0</color>
+    <color name="default_chip">#E0E0E0</color>
 </resources>

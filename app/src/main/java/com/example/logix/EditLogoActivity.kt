@@ -47,15 +47,18 @@ class EditLogoActivity : AppCompatActivity() {
     private val textOverlays = mutableListOf<DraggableTextView>()
     private val curvedTextOverlays = mutableListOf<DraggableCurvedTextView>()
     private lateinit var fontOptions: List<FontOption>
-
     private val undoRedoManager = UndoRedoManager()
-
     private var currentRotation = 0f
     private var currentScale = 1f
     private var currentOpacity = 100f
     private var currentBrightness = 100f
     private var currentContrast = 100f
     private var currentSaturation = 100f
+    private var currentRed = 100f
+    private var currentGreen = 100f
+    private var currentBlue = 100f
+    private var currentPositionX = 0f
+    private var currentPositionY = 0f
 
     private var originalDrawable: Drawable? = null
     private var originalSvg: SVG? = null
@@ -166,6 +169,30 @@ class EditLogoActivity : AppCompatActivity() {
                         "• 100% = Original saturation\n" +
                         "• 200% = Vibrant, intense colors\n\n" +
                         "Lower saturation creates a muted look; higher saturation makes colors pop."
+            )
+        }
+
+        // X Position help
+        binding.helpPositionX.setOnClickListener {
+            showHelpDialog(
+                "X Position",
+                "Move your logo horizontally (left/right).\n\n" +
+                        "• 0 = Center position\n" +
+                        "• Negative values = Move left\n" +
+                        "• Positive values = Move right\n\n" +
+                        "Range: -200px to +200px from center."
+            )
+        }
+
+        // Y Position help
+        binding.helpPositionY.setOnClickListener {
+            showHelpDialog(
+                "Y Position",
+                "Move your logo vertically (up/down).\n\n" +
+                        "• 0 = Center position\n" +
+                        "• Negative values = Move up\n" +
+                        "• Positive values = Move down\n\n" +
+                        "Range: -200px to +200px from center."
             )
         }
     }
@@ -461,7 +488,12 @@ class EditLogoActivity : AppCompatActivity() {
             opacity    = currentOpacity,
             brightness = currentBrightness,
             contrast   = currentContrast,
-            saturation = currentSaturation
+            saturation = currentSaturation,
+            red        = currentRed,
+            green      = currentGreen,
+            blue       = currentBlue,
+            positionX  = currentPositionX,
+            positionY  = currentPositionY
         )
     }
 
@@ -547,7 +579,12 @@ class EditLogoActivity : AppCompatActivity() {
             opacity    = currentOpacity,
             brightness = currentBrightness,
             contrast   = currentContrast,
-            saturation = currentSaturation
+            saturation = currentSaturation,
+            red        = currentRed,
+            green      = currentGreen,
+            blue       = currentBlue,
+            positionX  = currentPositionX,
+            positionY  = currentPositionY
         )
 
         val command = ImageAdjustmentCommand(
@@ -561,6 +598,11 @@ class EditLogoActivity : AppCompatActivity() {
                 currentBrightness = state.brightness
                 currentContrast   = state.contrast
                 currentSaturation = state.saturation
+                currentRed        = state.red
+                currentGreen      = state.green
+                currentBlue       = state.blue
+                currentPositionX  = state.positionX
+                currentPositionY  = state.positionY
                 currentBitmap     = state.bitmap
                 lastImageState    = state
                 updateSliderValues(state)
@@ -579,6 +621,11 @@ class EditLogoActivity : AppCompatActivity() {
         binding.brightnessSlider.value = state.brightness
         binding.contrastSlider.value   = state.contrast
         binding.saturationSlider.value = state.saturation
+        binding.redSlider.value        = state.red
+        binding.greenSlider.value      = state.green
+        binding.blueSlider.value       = state.blue
+        binding.positionXSlider.value  = state.positionX
+        binding.positionYSlider.value  = state.positionY
 
         binding.rotationValue.text   = "Rotation: ${state.rotation.toInt()}°"
         binding.scaleValue.text      = "Scale: ${(state.scale * 100).toInt()}%"
@@ -586,6 +633,11 @@ class EditLogoActivity : AppCompatActivity() {
         binding.brightnessValue.text = "Brightness: ${state.brightness.toInt()}%"
         binding.contrastValue.text   = "Contrast: ${state.contrast.toInt()}%"
         binding.saturationValue.text = "Saturation: ${state.saturation.toInt()}%"
+        binding.redValue.text        = "Red: ${state.red.toInt()}%"
+        binding.greenValue.text      = "Green: ${state.green.toInt()}%"
+        binding.blueValue.text       = "Blue: ${state.blue.toInt()}%"
+        binding.positionXValue.text  = "X: ${state.positionX.toInt()}px"
+        binding.positionYValue.text  = "Y: ${state.positionY.toInt()}px"
     }
 
     private fun applyImageAdjustmentsInternal() {
@@ -600,15 +652,20 @@ class EditLogoActivity : AppCompatActivity() {
                 processedBitmap = applyOpacityToBitmap(processedBitmap, currentOpacity / 100f)
             }
 
-            if (currentBrightness != 100f || currentContrast != 100f || currentSaturation != 100f) {
+            if (
+                currentBrightness != 100f || currentContrast != 100f || currentSaturation != 100f ||
+                currentRed != 100f || currentGreen != 100f || currentBlue != 100f
+            ) {
                 processedBitmap = applyColorAdjustmentsToBitmap(processedBitmap)
             }
 
             currentBitmap = processedBitmap
             binding.editLogoImage.setImageBitmap(processedBitmap)
             binding.editLogoImage.rotation = currentRotation
-            binding.editLogoImage.scaleX   = currentScale
-            binding.editLogoImage.scaleY   = currentScale
+            binding.editLogoImage.scaleX = currentScale
+            binding.editLogoImage.scaleY = currentScale
+            binding.editLogoImage.translationX = currentPositionX
+            binding.editLogoImage.translationY = currentPositionY
             binding.editLogoImage.invalidate()
         } catch (e: Exception) {
             e.printStackTrace()
@@ -629,8 +686,14 @@ class EditLogoActivity : AppCompatActivity() {
         ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark)?.let { binding.contrastSlider.setThumbTintList(it) }
         ContextCompat.getColorStateList(this, android.R.color.holo_blue_light)?.let { binding.contrastSlider.setTrackTintList(it) }
 
-        ContextCompat.getColorStateList(this, android.R.color.holo_red_dark)?.let { binding.saturationSlider.setThumbTintList(it) }
-        ContextCompat.getColorStateList(this, android.R.color.holo_red_light)?.let { binding.saturationSlider.setTrackTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_purple)?.let { binding.saturationSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_purple)?.let { binding.saturationSlider.setTrackTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_red_dark)?.let { binding.redSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_red_light)?.let { binding.redSlider.setTrackTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_green_dark)?.let { binding.greenSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_green_light)?.let { binding.greenSlider.setTrackTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark)?.let { binding.blueSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_blue_light)?.let { binding.blueSlider.setTrackTintList(it) }
 
         // Rotation slider (keep default or set a color)
         ContextCompat.getColorStateList(this, android.R.color.holo_purple)?.let { binding.rotationSlider.setThumbTintList(it) }
@@ -643,6 +706,14 @@ class EditLogoActivity : AppCompatActivity() {
         // Opacity slider (keep default or set a color)
         ContextCompat.getColorStateList(this, android.R.color.darker_gray)?.let { binding.opacitySlider.setThumbTintList(it) }
         ContextCompat.getColorStateList(this, android.R.color.darker_gray)?.let { binding.opacitySlider.setTrackTintList(it) }
+
+        // Position X slider
+        ContextCompat.getColorStateList(this, android.R.color.holo_orange_dark)?.let { binding.positionXSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_orange_light)?.let { binding.positionXSlider.setTrackTintList(it) }
+
+        // Position Y slider
+        ContextCompat.getColorStateList(this, android.R.color.holo_blue_dark)?.let { binding.positionYSlider.setThumbTintList(it) }
+        ContextCompat.getColorStateList(this, android.R.color.holo_blue_light)?.let { binding.positionYSlider.setTrackTintList(it) }
 
         // Rest of your existing listener code...
         binding.rotationSlider.addOnChangeListener { _, value, _ ->
@@ -681,6 +752,36 @@ class EditLogoActivity : AppCompatActivity() {
             applyImageAdjustmentsWithUndo()
         }
 
+        binding.redSlider.addOnChangeListener { _, value, _ ->
+            currentRed = value
+            binding.redValue.text = "Red: ${value.toInt()}%"
+            applyImageAdjustmentsWithUndo()
+        }
+
+        binding.greenSlider.addOnChangeListener { _, value, _ ->
+            currentGreen = value
+            binding.greenValue.text = "Green: ${value.toInt()}%"
+            applyImageAdjustmentsWithUndo()
+        }
+
+        binding.blueSlider.addOnChangeListener { _, value, _ ->
+            currentBlue = value
+            binding.blueValue.text = "Blue: ${value.toInt()}%"
+            applyImageAdjustmentsWithUndo()
+        }
+
+        binding.positionXSlider.addOnChangeListener { _, value, _ ->
+            currentPositionX = value
+            binding.positionXValue.text = "X: ${value.toInt()}px"
+            applyImageAdjustmentsWithUndo()
+        }
+
+        binding.positionYSlider.addOnChangeListener { _, value, _ ->
+            currentPositionY = value
+            binding.positionYValue.text = "Y: ${value.toInt()}px"
+            applyImageAdjustmentsWithUndo()
+        }
+
         binding.resetImageButton.setOnClickListener {
             resetImageAdjustmentsWithUndo()
         }
@@ -696,7 +797,12 @@ class EditLogoActivity : AppCompatActivity() {
             opacity    = 100f,
             brightness = 100f,
             contrast   = 100f,
-            saturation = 100f
+            saturation = 100f,
+            red        = 100f,
+            green      = 100f,
+            blue       = 100f,
+            positionX  = 0f,
+            positionY  = 0f
         )
 
         val command = ImageAdjustmentCommand(
@@ -710,6 +816,11 @@ class EditLogoActivity : AppCompatActivity() {
                 currentBrightness = state.brightness
                 currentContrast   = state.contrast
                 currentSaturation = state.saturation
+                currentRed        = state.red
+                currentGreen      = state.green
+                currentBlue       = state.blue
+                currentPositionX  = state.positionX
+                currentPositionY  = state.positionY
                 currentBitmap     = state.bitmap
                 lastImageState    = state
 
@@ -719,6 +830,11 @@ class EditLogoActivity : AppCompatActivity() {
                 binding.brightnessSlider.value = 100f
                 binding.contrastSlider.value   = 100f
                 binding.saturationSlider.value = 100f
+                binding.redSlider.value        = 100f
+                binding.greenSlider.value      = 100f
+                binding.blueSlider.value       = 100f
+                binding.positionXSlider.value  = 0f
+                binding.positionYSlider.value  = 0f
 
                 binding.rotationValue.text   = "Rotation: 0°"
                 binding.scaleValue.text      = "Scale: 100%"
@@ -726,6 +842,11 @@ class EditLogoActivity : AppCompatActivity() {
                 binding.brightnessValue.text = "Brightness: 100%"
                 binding.contrastValue.text   = "Contrast: 100%"
                 binding.saturationValue.text = "Saturation: 100%"
+                binding.redValue.text        = "Red: 100%"
+                binding.greenValue.text      = "Green: 100%"
+                binding.blueValue.text       = "Blue: 100%"
+                binding.positionXValue.text  = "X: 0px"
+                binding.positionYValue.text  = "Y: 0px"
             }
         )
 
@@ -755,7 +876,10 @@ class EditLogoActivity : AppCompatActivity() {
         paint.colorFilter = createColorFilter(
             currentBrightness / 100f,
             currentContrast   / 100f,
-            currentSaturation / 100f
+            currentSaturation / 100f,
+            currentRed / 100f,
+            currentGreen / 100f,
+            currentBlue / 100f
         )
         canvas.drawBitmap(source, 0f, 0f, paint)
         return result
@@ -764,7 +888,10 @@ class EditLogoActivity : AppCompatActivity() {
     private fun createColorFilter(
         brightness: Float,
         contrast:   Float,
-        saturation: Float
+        saturation: Float,
+        red: Float,
+        green: Float,
+        blue: Float
     ): ColorMatrixColorFilter {
         val colorMatrix = ColorMatrix()
 
@@ -787,6 +914,11 @@ class EditLogoActivity : AppCompatActivity() {
         val saturationMatrix = ColorMatrix()
         saturationMatrix.setSaturation(saturation)
         colorMatrix.postConcat(saturationMatrix)
+
+        val rgbMatrix = ColorMatrix().apply {
+            setScale(red, green, blue, 1f)
+        }
+        colorMatrix.postConcat(rgbMatrix)
 
         return ColorMatrixColorFilter(colorMatrix)
     }

@@ -11,7 +11,12 @@ data class ImageAdjustmentState(
     val opacity: Float,
     val brightness: Float,
     val contrast: Float,
-    val saturation: Float
+    val saturation: Float,
+    val red: Float,
+    val green: Float,
+    val blue: Float,
+    val positionX: Float = 0f,  // Added X position
+    val positionY: Float = 0f   // Added Y position
 )
 
 class ImageAdjustmentCommand(
@@ -38,6 +43,8 @@ class ImageAdjustmentCommand(
         imageView.rotation = state.rotation
         imageView.scaleX = state.scale
         imageView.scaleY = state.scale
+        imageView.translationX = state.positionX  // Apply X position
+        imageView.translationY = state.positionY  // Apply Y position
         onStateApplied(state)
     }
 }
