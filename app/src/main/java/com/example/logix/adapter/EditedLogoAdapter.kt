@@ -6,12 +6,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.logix.EditLogoActivity
 import com.example.logix.R
 import com.example.logix.models.EditedLogoEntry
+import com.google.android.material.bottomsheet.BottomSheetDialog
 import java.io.File
 
 class EditedLogoAdapter(
@@ -71,11 +74,47 @@ class EditedLogoAdapter(
             context.startActivity(intent)
         }
 
-        // Long-press or menu icon → remove from edited list
+        // Menu icon click → show bottom sheet dialog with delete option
         holder.menu.setOnClickListener {
-            onRemove(entry)
-            Toast.makeText(holder.itemView.context, "Removed from Edited Logos", Toast.LENGTH_SHORT).show()
+            showBottomSheetDialog(holder.itemView.context, entry)
         }
+    }
+
+    private fun showBottomSheetDialog(context: android.content.Context, entry: EditedLogoEntry) {
+        val bottomSheetDialog = BottomSheetDialog(context)
+        val bottomSheetView = LayoutInflater.from(context).inflate(R.layout.bottom_sheet_edited_logo_options, null)
+
+        val deleteOption = bottomSheetView.findViewById<TextView>(R.id.optionDelete)
+        val cancelOption = bottomSheetView.findViewById<TextView>(R.id.optionCancel)
+
+        deleteOption.setOnClickListener {
+            bottomSheetDialog.dismiss()
+            showDeleteConfirmationDialog(context, entry)
+        }
+
+        cancelOption.setOnClickListener {
+            bottomSheetDialog.dismiss()
+        }
+
+        bottomSheetDialog.setContentView(bottomSheetView)
+        bottomSheetDialog.show()
+    }
+
+    private fun showDeleteConfirmationDialog(context: android.content.Context, entry: EditedLogoEntry) {
+        AlertDialog.Builder(context)
+            .setTitle("Delete Edited Logo")
+            .setMessage("Are you sure you want to delete this edited logo? This action cannot be undone.")
+            .setPositiveButton("Delete") { _, _ ->
+                // Delete the physical file if it exists
+                val file = File(entry.savedImagePath)
+                if (file.exists()) {
+                    file.delete()
+                }
+                onRemove(entry)
+                Toast.makeText(context, "Edited logo deleted", Toast.LENGTH_SHORT).show()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
 
     override fun getItemCount() = entries.size
